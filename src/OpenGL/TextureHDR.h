@@ -1,0 +1,24 @@
+#pragma once
+#include "Texture2D.h"
+
+class TextureHDR : public Texture2D
+{
+protected:
+	const int MAX_PIXEL_COLOR = 256 * 256 * 256;
+    std::vector<float> vfPixelData;
+    int iNumChannels = 4;
+
+public:
+	TextureHDR(std::string name);
+
+    void updateImage();
+	void load(std::string TexFilepath, bool wait);
+    void setData(std::vector<float> data);
+    void setPixel(int x, int y, vec4 color);
+    void setNumChannels(int c);
+
+
+    ivec2 getSize();
+    const float* getPixelPtr();
+    vec4 getPixel(int x, int y);
+};
