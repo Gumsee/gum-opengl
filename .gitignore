@@ -1,0 +1,11 @@
+/build/
+/.cache/
+/compile_commands.json
+/core
+/lib
+*.so
+*.out
+*.log
+*.cmake
+libGumOpenGL.a
+Makefile
