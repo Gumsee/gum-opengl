@@ -112,7 +112,7 @@ void Material::delTexture(int Index)
 
 void Material::bindTextures()
 {
-	for (int i = 0; i < textures.size(); i++)
+	for (size_t i = 0; i < textures.size(); i++)
 	{
 		if(textures[i] != nullptr)
 		{
@@ -122,7 +122,7 @@ void Material::bindTextures()
 }
 void Material::unbindTextures()
 {
-	for (int i = 0; i < textures.size(); i++)
+	for (size_t i = 0; i < textures.size(); i++)
 	{
 		if(textures[i] != nullptr)
 		{

@@ -3,9 +3,10 @@ project (GumOpenGL)
 
 add_definitions(-DDEBUG)
 
-set(GUMMATH_DIRECTORY "/home/gumse/Projects/gumball/gum-maths/")
-set(GUMESSENTIALS_DIRECTORY "/home/gumse/Projects/gumball/gum-essentials/")
 set(GUM_INSTALLDIR "/usr/include/gumball/")
+set(GUMBALL_INCLUDE_DIR "/usr/include/gumball/")
+set(GUMMATH_DIRECTORY ${GUMBALL_INCLUDE_DIR})
+set(GUMESSENTIALS_DIRECTORY ${GUMBALL_INCLUDE_DIR})
 
 add_subdirectory(./src/)
 add_subdirectory(./examples/)
