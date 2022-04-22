@@ -1,8 +1,8 @@
 #include <GL/glew.h>
-#include <Essentials/Window.h>
 #include <Essentials/Output.h>
 #include "Framebuffer.h"
 #include "WrapperFunctions.h"
+#include <algorithm>
 
 Framebuffer* Framebuffer::pCurrentlyBoundFramebuffer = nullptr;
 

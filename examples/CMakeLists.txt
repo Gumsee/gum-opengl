@@ -23,11 +23,6 @@ set(EXAMPLE_FILE_LIST
 set(GUMOPENGL_LIBRARIES 
     GumEssentials
     GumMaths
-    sfml-graphics
-    sfml-network
-    sfml-audio
-    sfml-window
-    sfml-system
     GLEW 
     GL
     freetype

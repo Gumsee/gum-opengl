@@ -18,3 +18,14 @@ include_directories(${GUMESSENTIALS_DIRECTORY}/src/)
 file(GLOB_RECURSE SRC "./*.cpp")
 
 add_library(GumOpenGL STATIC ${SRC})
+
+file(GLOB HEADERS "./OpenGL/*.h")
+install(
+        FILES ${HEADERS}
+	DESTINATION ${GUM_INSTALLDIR}/OpenGL/
+)
+
+install(
+        FILES "./gum-opengl.h"
+        DESTINATION ${GUM_INSTALLDIR}/
+)
