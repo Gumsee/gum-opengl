@@ -5,10 +5,19 @@
 #include <future>
 #include "WrapperFunctions.h"
 #include <Essentials/Output.h>
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include <stb_image_write.h>
 
 Texture2D::Texture2D()
 {
-    
+	this->iType = TEXTURE2D;
+	this->sName = "unknown";
+    bind(0);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    unbind(0);
 }
 
 Texture2D::Texture2D(std::string name)
@@ -56,9 +65,10 @@ void Texture2D::load(std::string TexFilepath, bool wait)
     auto future = std::async(std::launch::async, [TexFilepath, wait, this] {
         TextureLoader::ImageData<unsigned char> imageData = TextureLoader::loadImage(TexFilepath);
         setSize(ivec2(imageData.width, imageData.height));
+        iChannels = imageData.numComps;
 
         std::vector<unsigned char> pixels;
-        for(int i = 0; i < imageData.width * imageData.height * 4; i++)
+        for(int i = 0; i < imageData.width * imageData.height * iChannels; i++)
         {
             pixels.push_back(imageData.data[i]);
         }
@@ -79,9 +89,25 @@ void Texture2D::load(std::string TexFilepath, bool wait)
 void Texture2D::updateImage()
 {
     bind(0);
-    if(!gumTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, v2Size, 0, GL_RGBA, GL_UNSIGNED_BYTE, &vPixelData[0]))
+    int pixelformat = GL_RGBA;
+    switch(iChannels) {
+        case 1:  pixelformat = GL_RED;  break;
+        case 2:  pixelformat = GL_RG;   break;
+        case 3:  pixelformat = GL_RGB;  break;
+        case 4:  pixelformat = GL_RGBA; break;
+    }
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    if(!gumTexImage2D(GL_TEXTURE_2D, 0, pixelformat, v2Size, 0, pixelformat, GL_UNSIGNED_BYTE, &vPixelData[0]))
         Gum::Output::error("Texture2D::updateImage: glTexImage Failed.");
     unbind(0);
+}
+
+void Texture2D::writeToFile(std::string filename, int filetype)
+{
+    if(filetype == GUM_TEXTURE_FILETYPE_PNG)
+        stbi_write_png(filename.c_str(), getSize().x, getSize().y, iChannels, &vPixelData[0], getSize().x * iChannels);
+    if(filetype == GUM_TEXTURE_FILETYPE_JPG)
+        stbi_write_jpg(filename.c_str(), getSize().x, getSize().y, iChannels, &vPixelData[0], 100);
 }
 
 //

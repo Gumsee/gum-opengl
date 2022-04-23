@@ -2,7 +2,6 @@
 #include <Essentials/Output.h>
 #include "Texture.h"
 #include <Essentials/Tools.h>
-#include <SFML/Graphics.hpp>
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 #include <iostream>
@@ -11,7 +10,7 @@
 #define TINYEXR_IMPLEMENTATION
 #include <tinyexr.h>*/
 
-TextureLoader::ImageData<unsigned char> TextureLoader::loadImage(std::string fileName)
+TextureLoader::ImageData<unsigned char> TextureLoader::loadImage(const std::string& fileName)
 {
     ImageData<unsigned char> imagedata;
 	std::string extension = Tools::toUpperCase(fileName.substr(fileName.length() - 3, 3));
@@ -20,11 +19,13 @@ TextureLoader::ImageData<unsigned char> TextureLoader::loadImage(std::string fil
        extension == "PNG" || 
        extension == "TGA" || 
        extension == "JPG" || 
+       extension == "JPEG" || 
        extension == "GIF" || 
-       extension == "PSD" || 
-       extension == "PIC")
+       extension == "PSD" ||
+       extension == "PIC"
+       )
     {
-	    sf::Image *img = new sf::Image();
+	    /*sf::Image *img = new sf::Image();
         if (!img->loadFromFile(fileName))
             Gum::Output::error("TextureLoader: Could not load Texture: " + fileName + "!");
 
@@ -36,8 +37,19 @@ TextureLoader::ImageData<unsigned char> TextureLoader::loadImage(std::string fil
         size_t dataSize = img->getSize().x * img->getSize().y * 4;
         imagedata.data = (unsigned char*)malloc(dataSize);
         memcpy(imagedata.data, img->getPixelsPtr(), dataSize);
+
+        delete img;*/
         
-        delete img;
+        unsigned char* data = stbi_load(fileName.c_str(), &imagedata.width, &imagedata.height, &imagedata.numComps, 0);
+        size_t dataSize = imagedata.width * imagedata.height * imagedata.numComps;
+        imagedata.data = (unsigned char*)malloc(dataSize);
+        memcpy(imagedata.data, data, dataSize);
+
+        
+        if(!data)
+            Gum::Output::error("TextureLoader: Failed to load image.");
+        stbi_image_free(data);
+
     }
     else
     {
@@ -48,7 +60,7 @@ TextureLoader::ImageData<unsigned char> TextureLoader::loadImage(std::string fil
     return imagedata;
 }
 
-TextureLoader::ImageData<float> TextureLoader::loadHDR(std::string fileName)
+TextureLoader::ImageData<float> TextureLoader::loadHDR(const std::string& fileName)
 {
     ImageData<float> imagedata;
 	std::string extension = Tools::toUpperCase(fileName.substr(fileName.length() - 3, 3));

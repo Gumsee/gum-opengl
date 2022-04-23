@@ -13,6 +13,6 @@ public:
         int numComps = 4;
         T* data;
     };
-	static ImageData<unsigned char> loadImage(std::string fileName);
-	static ImageData<float> loadHDR(std::string fileName);
+	static ImageData<unsigned char> loadImage(const std::string& fileName);
+	static ImageData<float> loadHDR(const std::string& fileName);
 };

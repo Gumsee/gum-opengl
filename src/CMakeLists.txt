@@ -29,3 +29,7 @@ install(
         FILES "./gum-opengl.h"
         DESTINATION ${GUM_INSTALLDIR}/
 )
+
+install(TARGETS ${CMAKE_PROJECT_NAME} EXPORT
+		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+)
