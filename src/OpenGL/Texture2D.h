@@ -26,15 +26,18 @@ public:
 
     float getHeightMapPixel(int x, int y);
     void writeToFile(std::string filename, int filetype);
+    void initEmpty();
 
 
     //Setter
     void setSize(ivec2 size);
     void setData(std::vector<unsigned char> data);
     void setPixel(int x, int y, vec4 color);
+    void setNumChannels(int channels);
 
     //Getter
     ivec2 getSize();
     const unsigned char* getPixelPtr();
     vec4 getPixel(int x, int y);
+    int numChannels();
 };

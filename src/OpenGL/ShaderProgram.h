@@ -35,6 +35,7 @@ public:
 
 	void LoadUniform(const std::string& uniformName, const bool& var);
 	void LoadUniform(const std::string& uniformName, const vec2& var);
+	void LoadUniform(const std::string& uniformName, const ivec2& var);
 	void LoadUniform(const std::string& uniformName, const vec3& var);
 	void LoadUniform(const std::string& uniformName, const ivec3& var);
 	void LoadUniform(const std::string& uniformName, const vec4& var);

@@ -12,6 +12,7 @@ Texture2D::Texture2D()
 {
 	this->iType = TEXTURE2D;
 	this->sName = "unknown";
+	this->iChannels = 4;
     bind(0);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -24,6 +25,7 @@ Texture2D::Texture2D(std::string name)
 {
 	this->iType = TEXTURE2D;
 	this->sName = name;
+	this->iChannels = 4;
     bind(0);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -109,6 +111,12 @@ void Texture2D::writeToFile(std::string filename, int filetype)
     if(filetype == GUM_TEXTURE_FILETYPE_JPG)
         stbi_write_jpg(filename.c_str(), getSize().x, getSize().y, iChannels, &vPixelData[0], 100);
 }
+    
+void Texture2D::initEmpty()
+{
+    vPixelData.resize(v2Size.x * v2Size.y * iChannels);
+    std::fill(vPixelData.begin(), vPixelData.end(), 255);
+}
 
 //
 // Setter
@@ -116,12 +124,14 @@ void Texture2D::writeToFile(std::string filename, int filetype)
 void Texture2D::setSize(ivec2 size)                       { this->v2Size = size; }
 void Texture2D::setData(std::vector<unsigned char> data)  { this->vPixelData = data; }
 void Texture2D::setPixel(int x, int y, vec4 color) 
-{ 
-    int pos = v2Size.x * y + x;
-    vPixelData[pos + 0] = color.x;
-    vPixelData[pos + 1] = color.y;
-    vPixelData[pos + 2] = color.z;
-    vPixelData[pos + 3] = color.w; 
+{
+    int pos = v2Size.x * y * iChannels + x * iChannels;
+    for(unsigned int i = 0; i < iChannels; i++)
+        vPixelData[pos + i] = color[i] * 255;
+}
+void Texture2D::setNumChannels(int channels)
+{
+    this->iChannels = channels;
 }
 
 
@@ -132,6 +142,10 @@ ivec2 Texture2D::getSize() 						        { return this->v2Size; }
 const unsigned char* Texture2D::getPixelPtr() 	        { return &this->vPixelData[0]; }
 vec4 Texture2D::getPixel(int x, int y) 	        
 { 
-    int pos = v2Size.x * y + x;
-    return vec4(vPixelData[pos + 0], vPixelData[pos + 1], vPixelData[pos + 2], vPixelData[pos + 3]);
+    int pos = v2Size.x * y * iChannels + x * iChannels;
+    vec4 retcol;
+    for(unsigned int i = 0; i < iChannels; i++)
+        retcol[i] = (float)vPixelData[pos + i] / 255.0f;
+    return retcol;
 }
+int Texture2D::numChannels() { return this->iChannels; }

@@ -139,13 +139,14 @@ void ShaderProgram::rebuild()
 
 void ShaderProgram::LoadUniform(const std::string& uniformName, const bool& var) 				{ glUniform1i(Locations[uniformName], var); }
 void ShaderProgram::LoadUniform(const std::string& uniformName, const vec2& var) 				{ glUniform2f(Locations[uniformName], var.x, var.y); }
+void ShaderProgram::LoadUniform(const std::string& uniformName, const ivec2& var) 				{ glUniform2i(Locations[uniformName], var.x, var.y); }
 void ShaderProgram::LoadUniform(const std::string& uniformName, const vec3& var) 				{ glUniform3f(Locations[uniformName], var.x, var.y, var.z); }
-void ShaderProgram::LoadUniform(const std::string& uniformName, const ivec3& var) 		    { glUniform3i(Locations[uniformName], var.x, var.y, var.z); }
+void ShaderProgram::LoadUniform(const std::string& uniformName, const ivec3& var) 		    	{ glUniform3i(Locations[uniformName], var.x, var.y, var.z); }
 void ShaderProgram::LoadUniform(const std::string& uniformName, const vec4& var) 				{ glUniform4f(Locations[uniformName], var.x, var.y, var.z, var.w); }
 void ShaderProgram::LoadUniform(const std::string& uniformName, const mat4& var) 			    { glUniformMatrix4fv(Locations[uniformName], 1, GL_FALSE, &var[0][0]); }
-void ShaderProgram::LoadUniform(const std::string& uniformName, const float& var) 			{ glUniform1f(Locations[uniformName], var); }
+void ShaderProgram::LoadUniform(const std::string& uniformName, const float& var) 				{ glUniform1f(Locations[uniformName], var); }
 void ShaderProgram::LoadUniform(const std::string& uniformName, const int& var) 				{ glUniform1i(Locations[uniformName], var); }
-void ShaderProgram::LoadUniform(const std::string& uniformName, const std::vector<mat4>& var) { for (size_t i = 0; i < var.size(); i++) { LoadUniform(uniformName + "[" + std::to_string(i) + "]", var[i]); } }
+void ShaderProgram::LoadUniform(const std::string& uniformName, const std::vector<mat4>& var) 	{ for (size_t i = 0; i < var.size(); i++) { LoadUniform(uniformName + "[" + std::to_string(i) + "]", var[i]); } }
 
 
 //
