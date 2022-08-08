@@ -43,9 +43,9 @@ float Texture2D::getHeightMapPixel(int x, int y)
 	}
 	else
 	{
-		float returnHeight = (float)getPixel(x, y).x * (float)getPixel(x, y).y * (float)getPixel(x, y).z;
-		returnHeight += MAX_PIXEL_COLOR / 2;
-		returnHeight /= MAX_PIXEL_COLOR / 2;
+		float returnHeight = getPixel(x, y).x * getPixel(x, y).y * getPixel(x, y).z;
+		returnHeight += MAX_PIXEL_COLOR / 2.0f;
+		returnHeight /= MAX_PIXEL_COLOR / 2.0f;
 		return returnHeight;
 	}
 }
@@ -70,7 +70,7 @@ void Texture2D::load(std::string TexFilepath, bool wait)
         iChannels = imageData.numComps;
 
         std::vector<unsigned char> pixels;
-        for(int i = 0; i < imageData.width * imageData.height * iChannels; i++)
+        for(unsigned int i = 0; i < imageData.width * imageData.height * iChannels; i++)
         {
             pixels.push_back(imageData.data[i]);
         }

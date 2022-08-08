@@ -9,9 +9,9 @@
 class Texture2D : public Texture
 {
 protected:
-	const int MAX_PIXEL_COLOR = 256 * 256 * 256;
+	const unsigned int MAX_PIXEL_COLOR = 256 * 256 * 256;
 	ivec2 v2Size;
-    int iChannels;
+    unsigned int iChannels;
     std::vector<unsigned char> vPixelData;
 
 
