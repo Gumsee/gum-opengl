@@ -24,22 +24,7 @@ TextureLoader::ImageData<unsigned char> TextureLoader::loadImage(const std::stri
        extension == "PSD" ||
        extension == "PIC"
        )
-    {
-	    /*sf::Image *img = new sf::Image();
-        if (!img->loadFromFile(fileName))
-            Gum::Output::error("TextureLoader: Could not load Texture: " + fileName + "!");
-
-        if(img->getPixelsPtr() == 0)
-            Gum::Output::error("TextureLoader: Texture Empty! (" + fileName + ")");
-            
-        imagedata.width = img->getSize().x;
-        imagedata.height = img->getSize().y;
-        size_t dataSize = img->getSize().x * img->getSize().y * 4;
-        imagedata.data = (unsigned char*)malloc(dataSize);
-        memcpy(imagedata.data, img->getPixelsPtr(), dataSize);
-
-        delete img;*/
-        
+    {        
         unsigned char* data = stbi_load(fileName.c_str(), &imagedata.width, &imagedata.height, &imagedata.numComps, 0);
         size_t dataSize = imagedata.width * imagedata.height * imagedata.numComps;
         imagedata.data = (unsigned char*)malloc(dataSize);

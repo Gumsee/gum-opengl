@@ -5,6 +5,7 @@
 #include <future>
 #include "WrapperFunctions.h"
 #include <Essentials/Output.h>
+#include <vector>
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image_write.h>
 
@@ -88,6 +89,14 @@ void Texture2D::load(std::string TexFilepath, bool wait)
     }
 }
 
+void Texture2D::loadFromMemory(unsigned char* pixels, size_t size, int numchannels)
+{
+    setNumChannels(numchannels);
+    for(size_t i = 0; i < size; i++)
+        vPixelData.push_back(pixels[i]);
+    updateImage();
+}
+
 void Texture2D::updateImage()
 {
     bind(0);
@@ -131,6 +140,11 @@ void Texture2D::setPixel(int x, int y, vec4 color)
 }
 void Texture2D::setNumChannels(int channels)
 {
+    if(channels > 4)
+    {
+        Gum::Output::error("Invalid number of channels");
+        return;
+    }
     this->iChannels = channels;
 }
 
