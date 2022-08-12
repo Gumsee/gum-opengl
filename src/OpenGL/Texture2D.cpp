@@ -89,9 +89,15 @@ void Texture2D::load(std::string TexFilepath, bool wait)
     }
 }
 
-void Texture2D::loadFromMemory(unsigned char* pixels, size_t size, int numchannels)
+void Texture2D::loadFromMemory(unsigned char* pixels, size_t size, ivec2 dimensions, int numchannels)
 {
+    char* img;
+    int w, h, n;
+    extern char _binary_font_png_start, _binary_font_png_end;
+    img = (char*)stbi_load_from_memory((unsigned char*)&_binary_font_png_start, 
+        &_binary_font_png_end - &_binary_font_png_start, &w, &h, &n, 4);
     setNumChannels(numchannels);
+    setSize(dimensions);
     for(size_t i = 0; i < size; i++)
         vPixelData.push_back(pixels[i]);
     updateImage();

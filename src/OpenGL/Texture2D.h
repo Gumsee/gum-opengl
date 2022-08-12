@@ -21,7 +21,7 @@ public:
 
     void updateImage();
 	void load(std::string TexFilepath, bool wait);
-	void loadFromMemory(unsigned char* pixels, size_t size, int numchannels);
+	void loadFromMemory(unsigned char* pixels, size_t size, ivec2 dimensions, int numchannels);
 	virtual void bind(int index = 0);
 	virtual void unbind(int index = 0);
 
