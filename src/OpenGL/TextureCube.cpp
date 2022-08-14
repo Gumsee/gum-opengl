@@ -1,8 +1,9 @@
 #include "TextureCube.h"
 #include "TextureLoader.h"
 #include <GL/glew.h>
-#include <iostream>
+#include <Essentials/Output.h>
 #include <future>
+#include "WrapperFunctions.h"
 
 TextureCube::TextureCube(std::string name)
 {
@@ -27,4 +28,67 @@ void TextureCube::unbind(int index)
 {
 	glActiveTexture(GL_TEXTURE0 + index);
     glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+}
+
+	
+void TextureCube::updateImage()
+{
+    bind(0);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	for(int i = 0; i < 6; i++)
+	{
+		int pixelformat = GL_RGBA;
+		switch(iChannels[i]) {
+			case 1:  pixelformat = GL_RED;  break;
+			case 2:  pixelformat = GL_RG;   break;
+			case 3:  pixelformat = GL_RGB;  break;
+			case 4:  pixelformat = GL_RGBA; break;
+		}
+
+		if(!gumTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, pixelformat, v2Size[i], 0, pixelformat, GL_UNSIGNED_BYTE, &(vPixelData[i])[0]))
+			Gum::Output::error("TextureCube::updateImage: glTexImage Failed.");
+	}
+    unbind(0);
+}
+
+void TextureCube::load(std::vector<std::string> texturepaths, bool wait)
+{
+	if(texturepaths.size() != 6)
+	{
+		Gum::Output::error("TextureCube.load: Wrong amount of textures specified.");
+		return;
+	}
+
+    auto future = std::async(std::launch::async, [texturepaths, wait, this] {
+		for(size_t i = 0; i < texturepaths.size(); i++)
+		{
+			TextureLoader::ImageData<unsigned char> imageData = TextureLoader::loadImage(texturepaths[i]);
+			v2Size[i] = ivec2(imageData.width, imageData.height);
+			iChannels[i] = imageData.numComps;
+
+			std::vector<unsigned char> pixels;
+			for(int i = 0; i < imageData.width * imageData.height * iChannels[i]; i++)
+			{
+				pixels.push_back(imageData.data[i]);
+			}
+			setData(pixels, i);
+		}
+
+		updateImage();
+		if(!wait)
+			vTexturesToLoad.push_back(this);	
+        markLoaded();
+    });
+
+    if(wait)
+    {
+        future.wait();
+        updateImage();
+    }
+
+}
+	
+void TextureCube::setData(std::vector<unsigned char> data, const unsigned int& side)
+{
+
 }
