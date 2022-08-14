@@ -26,6 +26,7 @@ TextureLoader::ImageData<unsigned char> TextureLoader::loadImage(const std::stri
        )
     {        
         unsigned char* data = stbi_load(fileName.c_str(), &imagedata.width, &imagedata.height, &imagedata.numComps, 0);
+        std::cout << imagedata.numComps << std::endl;
         size_t dataSize = imagedata.width * imagedata.height * imagedata.numComps;
         imagedata.data = (unsigned char*)malloc(dataSize);
         memcpy(imagedata.data, data, dataSize);
@@ -44,6 +45,26 @@ TextureLoader::ImageData<unsigned char> TextureLoader::loadImage(const std::stri
 	Gum::Output::info("TextureLoader: Texture loaded! (" + fileName + ")");
     return imagedata;
 }
+
+
+TextureLoader::ImageData<unsigned char> TextureLoader::loadImage(const unsigned char* pixels, size_t length)
+{
+    ImageData<unsigned char> imagedata;
+    unsigned char* data = stbi_load_from_memory(pixels, length, &imagedata.width, &imagedata.height, &imagedata.numComps, 0);
+
+    size_t dataSize = imagedata.width * imagedata.height * imagedata.numComps;
+    imagedata.data = (unsigned char*)malloc(dataSize);
+    memcpy(imagedata.data, data, dataSize);
+
+    
+    if(!data)
+        Gum::Output::error("TextureLoader: Failed to load image.");
+    stbi_image_free(data);
+
+	Gum::Output::info("TextureLoader: Texture loaded from Memory!");
+    return imagedata;
+}
+
 
 TextureLoader::ImageData<float> TextureLoader::loadHDR(const std::string& fileName)
 {

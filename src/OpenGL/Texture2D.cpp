@@ -5,23 +5,13 @@
 #include <future>
 #include "WrapperFunctions.h"
 #include <Essentials/Output.h>
+#include <Essentials/Filesystem/Filesystem.h>
+#include <Essentials/Tools.h>
 #include <vector>
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image_write.h>
 
-Texture2D::Texture2D()
-{
-	this->iType = TEXTURE2D;
-	this->sName = "unknown";
-	this->iChannels = 4;
-    bind(0);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    unbind(0);
-}
-
+Texture2D::Texture2D() : Texture2D("unknown") {}
 Texture2D::Texture2D(std::string name)
 {
 	this->iType = TEXTURE2D;
@@ -69,6 +59,7 @@ void Texture2D::load(std::string TexFilepath, bool wait)
         TextureLoader::ImageData<unsigned char> imageData = TextureLoader::loadImage(TexFilepath);
         setSize(ivec2(imageData.width, imageData.height));
         iChannels = imageData.numComps;
+        std::cout << "channels: "  << iChannels << std::endl;
 
         std::vector<unsigned char> pixels;
         for(unsigned int i = 0; i < imageData.width * imageData.height * iChannels; i++)
@@ -89,17 +80,17 @@ void Texture2D::load(std::string TexFilepath, bool wait)
     }
 }
 
-void Texture2D::loadFromMemory(unsigned char* pixels, size_t size, ivec2 dimensions, int numchannels)
+void Texture2D::loadFromMemory(unsigned char* pixels, size_t size)
 {
-    char* img;
-    int w, h, n;
-    extern char _binary_font_png_start, _binary_font_png_end;
-    img = (char*)stbi_load_from_memory((unsigned char*)&_binary_font_png_start, 
-        &_binary_font_png_end - &_binary_font_png_start, &w, &h, &n, 4);
-    setNumChannels(numchannels);
-    setSize(dimensions);
-    for(size_t i = 0; i < size; i++)
-        vPixelData.push_back(pixels[i]);
+    TextureLoader::ImageData<unsigned char> imageData = TextureLoader::loadImage(pixels, size);
+    setNumChannels(imageData.numComps);
+    setSize(ivec2(imageData.width, imageData.height));
+    std::vector<unsigned char> vpixels;
+    for(unsigned int i = 0; i < imageData.width * imageData.height * iChannels; i++)
+    {
+        vpixels.push_back(imageData.data[i]);
+    }
+    setData(vpixels);
     updateImage();
 }
 
@@ -121,10 +112,33 @@ void Texture2D::updateImage()
 
 void Texture2D::writeToFile(std::string filename, int filetype)
 {
-    if(filetype == GUM_TEXTURE_FILETYPE_PNG)
-        stbi_write_png(filename.c_str(), getSize().x, getSize().y, iChannels, &vPixelData[0], getSize().x * iChannels);
-    if(filetype == GUM_TEXTURE_FILETYPE_JPG)
-        stbi_write_jpg(filename.c_str(), getSize().x, getSize().y, iChannels, &vPixelData[0], 100);
+    switch(filetype)
+    {
+        case GUM_TEXTURE_FILETYPE_PNG:
+            stbi_write_png(filename.c_str(), getSize().x, getSize().y, iChannels, &vPixelData[0], getSize().x * iChannels);
+            break;
+        
+        case GUM_TEXTURE_FILETYPE_JPG:
+            stbi_write_jpg(filename.c_str(), getSize().x, getSize().y, iChannels, &vPixelData[0], 100);
+            break;
+
+        case GUM_TEXTURE_FILETYPE_PNG_HEADER:
+            std::cout << iChannels << std::endl;
+            stbi_write_png_to_func([](void *context, void *data, int size) {
+                std::string outStr = "unsigned char image[] = {\n";
+                int stride = std::sqrt(size);
+                for(int i = 0; i < size; i++)
+                {
+                    outStr += Tools::decToHex(((unsigned char*)data)[i]) + ", ";
+                    if(i % stride == 0)
+                        outStr += "\n";
+                }
+                outStr += "\n};";
+
+                Gum::Filesystem::writeToFile("./image.h", outStr);
+            }, this, getSize().x, getSize().y, iChannels, &vPixelData[0], getSize().x * iChannels);
+            break;
+    }
 }
     
 void Texture2D::initEmpty()
@@ -136,15 +150,15 @@ void Texture2D::initEmpty()
 //
 // Setter
 //
-void Texture2D::setSize(ivec2 size)                       { this->v2Size = size; }
-void Texture2D::setData(std::vector<unsigned char> data)  { this->vPixelData = data; }
-void Texture2D::setPixel(int x, int y, vec4 color) 
+void Texture2D::setSize(const ivec2& size)                              { this->v2Size = size; }
+void Texture2D::setData(std::vector<unsigned char> data)                { this->vPixelData = data; }
+void Texture2D::setPixel(const int& x, const int& y, const vec4& color) 
 {
     int pos = v2Size.x * y * iChannels + x * iChannels;
     for(unsigned int i = 0; i < iChannels; i++)
         vPixelData[pos + i] = color[i] * 255;
 }
-void Texture2D::setNumChannels(int channels)
+void Texture2D::setNumChannels(const int& channels)
 {
     if(channels > 4)
     {
@@ -158,9 +172,9 @@ void Texture2D::setNumChannels(int channels)
 //
 // Getter
 //
-ivec2 Texture2D::getSize() 						        { return this->v2Size; }
+ivec2 Texture2D::getSize() const				        { return this->v2Size; }
 const unsigned char* Texture2D::getPixelPtr() 	        { return &this->vPixelData[0]; }
-vec4 Texture2D::getPixel(int x, int y) 	        
+vec4 Texture2D::getPixel(int x, int y) const
 { 
     int pos = v2Size.x * y * iChannels + x * iChannels;
     vec4 retcol;
@@ -168,4 +182,4 @@ vec4 Texture2D::getPixel(int x, int y)
         retcol[i] = (float)vPixelData[pos + i] / 255.0f;
     return retcol;
 }
-int Texture2D::numChannels() { return this->iChannels; }
+int Texture2D::numChannels() const                      { return this->iChannels; }

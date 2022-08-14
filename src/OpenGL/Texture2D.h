@@ -5,6 +5,7 @@
 #define GUM_TEXTURE_FILETYPE_PNG 1
 #define GUM_TEXTURE_FILETYPE_TGA 2
 #define GUM_TEXTURE_FILETYPE_JPG 2
+#define GUM_TEXTURE_FILETYPE_PNG_HEADER 3
 
 class Texture2D : public Texture
 {
@@ -21,7 +22,7 @@ public:
 
     void updateImage();
 	void load(std::string TexFilepath, bool wait);
-	void loadFromMemory(unsigned char* pixels, size_t size, ivec2 dimensions, int numchannels);
+	void loadFromMemory(unsigned char* pixels, size_t size);
 	virtual void bind(int index = 0);
 	virtual void unbind(int index = 0);
 
@@ -31,14 +32,14 @@ public:
 
 
     //Setter
-    void setSize(ivec2 size);
+    void setSize(const ivec2& size);
     void setData(std::vector<unsigned char> data);
-    void setPixel(int x, int y, vec4 color);
-    void setNumChannels(int channels);
+    void setPixel(const int& x, const int& y, const vec4& color);
+    void setNumChannels(const int& channels);
 
     //Getter
-    ivec2 getSize();
+    ivec2 getSize() const;
     const unsigned char* getPixelPtr();
-    vec4 getPixel(int x, int y);
-    int numChannels();
+    vec4 getPixel(int x, int y) const;
+    int numChannels() const;
 };

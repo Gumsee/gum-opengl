@@ -7,6 +7,7 @@ std::vector<Texture*> Texture::vTexturesToLoad;
 Texture::Texture()
 {
 	this->bLoaded = false;
+	this->bIsGrayscale = false;
 	this->iTextureID = 0;
     glGenTextures(1, &iTextureID);
 	this->sName = "EmptyTexture";
@@ -18,22 +19,24 @@ Texture::~Texture()
 }
 
 void Texture::updateImage() {}
-void Texture::bind(int index) {}
-void Texture::unbind(int index) {}
+void Texture::bind(const int& index) {}
+void Texture::unbind(const int& index) {}
 
 //
 // Setter
 //
-void Texture::setName(std::string name) 		        { this->sName = name; }
-void Texture::setID(int id) 					        { this->iTextureID = id; }
+void Texture::setName(const std::string& name)	        { this->sName = name; }
+void Texture::setID(const int& id) 				        { this->iTextureID = id; }
 void Texture::markLoaded()                              { this->bLoaded = true; }
+void Texture::setGrayscale(const bool& isgrayscale)     { this->bIsGrayscale = isgrayscale; }
 
 
 //
 // Getter
 //
-unsigned int Texture::getID() 					        { return this->iTextureID; }
-unsigned int Texture::getType() 				        { return this->iType; }
-bool Texture::isLoaded() 						        { return this->bLoaded; }
-std::string Texture::getName() 					        { return this->sName; }
+unsigned int Texture::getID() const				        { return this->iTextureID; }
+unsigned int Texture::getType() const 			        { return this->iType; }
+bool Texture::isLoaded() const 					        { return this->bLoaded; }
+std::string Texture::getName() const			        { return this->sName; }
 std::vector<Texture*> Texture::getTexturesToLoad()		{ return vTexturesToLoad; }
+bool Texture::isGrayscale() const                       { return this->bIsGrayscale; }

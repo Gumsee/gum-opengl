@@ -14,5 +14,6 @@ public:
         T* data;
     };
 	static ImageData<unsigned char> loadImage(const std::string& fileName);
+	static ImageData<unsigned char> loadImage(const unsigned char* pixels, size_t length);
 	static ImageData<float> loadHDR(const std::string& fileName);
 };
