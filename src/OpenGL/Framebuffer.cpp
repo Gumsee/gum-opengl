@@ -1,5 +1,6 @@
 #include <GL/glew.h>
 #include <Essentials/Output.h>
+#include "Essentials/Tools.h"
 #include "Framebuffer.h"
 #include "WrapperFunctions.h"
 #include <algorithm>
@@ -24,6 +25,15 @@ Framebuffer::Framebuffer(const ivec2& size, const vec4& clearcolor)
 Framebuffer::~Framebuffer() 
 {
 	glDeleteFramebuffers(1, &this->framebufferID);
+    for(size_t i = 0; i < vTextureAttachments.size(); i++)
+    {
+        if(vTextureAttachments[i] != nullptr)
+            delete vTextureAttachments[i];
+        vTextureAttachments[i] = nullptr;
+    }
+    if(pDepthTexture != nullptr)
+        delete pDepthTexture;
+    pDepthTexture = nullptr;
 }
 
 void Framebuffer::bind()
@@ -176,10 +186,22 @@ void Framebuffer::setDepthTextureAttachment(Texture2D* depthMap)
     unbind();
 }
 
+void Framebuffer::drawAttachmentTexture(const int& textureattachmentindex, const int& colorattachmentindex, const int& target)
+{
+    bind();
+    glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + colorattachmentindex, 
+        target, getTextureAttachment(textureattachmentindex)->getID(), 0);
+    GLenum status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
+    if(status != GL_FRAMEBUFFER_COMPLETE)
+        Gum::Output::error("glFramebufferTexture2D: Status error: " + Tools::decToHex(status));
+    
+    //dont unbind automatically
+}
+
 void Framebuffer::setOffset(ivec2 offset)               { this->v2Offset = offset; }
 void Framebuffer::setSize(ivec2 size)                   { this->v2Size = size; }
 
-Texture* Framebuffer::getTextureAttachment(int index) { return this->vTextureAttachments[index]; }
+Texture* Framebuffer::getTextureAttachment(int index)   { return this->vTextureAttachments[index]; }
 Texture2D* Framebuffer::getDepthTextureAttachment()     { return this->pDepthTexture; }
 int Framebuffer::getDepthAttachmentID()                 { return this->iDepthBufferID; }
 int Framebuffer::numTextureAttachments()                { return this->vTextureAttachments.size(); }

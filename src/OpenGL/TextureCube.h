@@ -13,8 +13,8 @@ protected:
 public:
 	TextureCube(std::string name);
 
-	void bind(int index = 0);
-	void unbind(int index = 0);
+	void bind(const int& index = 0);
+	void unbind(const int& index = 0);
 	
     void updateImage();
 	void load(std::vector<std::string> texturepaths, bool wait);

@@ -23,6 +23,7 @@ public:
     inline static const std::string SHADER_VERSION_STR = "#version 330 core \n";
 
     Shader(std::string sourcecode, int shadertype);
+    ~Shader();
 
     std::string compile();
 

@@ -12,6 +12,8 @@ ShaderProgram::~ShaderProgram()
 {
 	Locations.clear();
 	vShaders.clear();
+	if(this->iProgramID != 0)
+		glDeleteProgram(this->iProgramID);
 }
 
 //Compiles the shaders into a form that your GPU can understand

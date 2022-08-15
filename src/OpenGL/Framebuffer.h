@@ -34,6 +34,7 @@ public:
 
     void setDepthAttachment(unsigned int attachment);
     void setDepthTextureAttachment(Texture2D* depthMap);
+    void drawAttachmentTexture(const int& textureattachmentindex, const int& colorattachmentindex, const int& target);
 
     void setOffset(ivec2 offset);
     void setSize(ivec2 size);

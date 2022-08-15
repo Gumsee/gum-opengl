@@ -24,7 +24,7 @@ public:
 	};
 
 	Texture();
-	~Texture();
+	virtual ~Texture();
 
     virtual void updateImage();
 	virtual void bind(const int& index = 0);

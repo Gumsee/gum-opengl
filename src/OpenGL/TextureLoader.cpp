@@ -26,7 +26,7 @@ TextureLoader::ImageData<unsigned char> TextureLoader::loadImage(const std::stri
        )
     {        
         unsigned char* data = stbi_load(fileName.c_str(), &imagedata.width, &imagedata.height, &imagedata.numComps, 0);
-        std::cout << imagedata.numComps << std::endl;
+
         size_t dataSize = imagedata.width * imagedata.height * imagedata.numComps;
         imagedata.data = (unsigned char*)malloc(dataSize);
         memcpy(imagedata.data, data, dataSize);

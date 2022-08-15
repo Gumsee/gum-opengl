@@ -18,13 +18,13 @@ TextureCube::TextureCube(std::string name)
     unbind();
 }
 
-void TextureCube::bind(int index)
+void TextureCube::bind(const int& index)
 {
 	glActiveTexture(GL_TEXTURE0 + index);
     glBindTexture(GL_TEXTURE_CUBE_MAP, iTextureID);
 }
 
-void TextureCube::unbind(int index)
+void TextureCube::unbind(const int& index)
 {
 	glActiveTexture(GL_TEXTURE0 + index);
     glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
@@ -34,11 +34,12 @@ void TextureCube::unbind(int index)
 void TextureCube::updateImage()
 {
     bind(0);
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    //glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	for(int i = 0; i < 6; i++)
 	{
 		int pixelformat = GL_RGBA;
-		switch(iChannels[i]) {
+		switch(iChannels[i]) 
+		{
 			case 1:  pixelformat = GL_RED;  break;
 			case 2:  pixelformat = GL_RG;   break;
 			case 3:  pixelformat = GL_RGB;  break;
@@ -90,5 +91,5 @@ void TextureCube::load(std::vector<std::string> texturepaths, bool wait)
 	
 void TextureCube::setData(std::vector<unsigned char> data, const unsigned int& side)
 {
-
+	vPixelData[side] = data;
 }

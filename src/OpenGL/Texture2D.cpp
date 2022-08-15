@@ -41,13 +41,13 @@ float Texture2D::getHeightMapPixel(int x, int y)
 	}
 }
 
-void Texture2D::bind(int index)
+void Texture2D::bind(const int& index)
 {
 	glActiveTexture(GL_TEXTURE0 + index);
     glBindTexture(GL_TEXTURE_2D, iTextureID);
 }
 
-void Texture2D::unbind(int index)
+void Texture2D::unbind(const int& index)
 {
 	glActiveTexture(GL_TEXTURE0 + index);
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -59,18 +59,19 @@ void Texture2D::load(std::string TexFilepath, bool wait)
         TextureLoader::ImageData<unsigned char> imageData = TextureLoader::loadImage(TexFilepath);
         setSize(ivec2(imageData.width, imageData.height));
         iChannels = imageData.numComps;
-        std::cout << "channels: "  << iChannels << std::endl;
 
         std::vector<unsigned char> pixels;
         for(unsigned int i = 0; i < imageData.width * imageData.height * iChannels; i++)
         {
             pixels.push_back(imageData.data[i]);
         }
+        free(imageData.data);
         setData(pixels);
         updateImage();
         if(!wait)
             vTexturesToLoad.push_back(this);
         markLoaded();
+        std::cout << vPixelData.size() << std::endl;
     });
 
     if(wait)
@@ -90,6 +91,7 @@ void Texture2D::loadFromMemory(unsigned char* pixels, size_t size)
     {
         vpixels.push_back(imageData.data[i]);
     }
+    free(imageData.data);
     setData(vpixels);
     updateImage();
 }

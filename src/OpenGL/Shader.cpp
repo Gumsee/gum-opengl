@@ -15,6 +15,12 @@ Shader::Shader(std::string sourcecode, int shadertype)
     this->iShaderID = glCreateShader(this->iType);
 }
 
+Shader::~Shader()
+{
+    if(iShaderID != 0)
+        glDeleteShader(iShaderID);
+}
+
 std::string Shader::compile()
 {
     const char* shaderStr = this->sSource.c_str();

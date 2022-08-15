@@ -16,8 +16,8 @@ public:
 
     void updateImage();
 	void load(std::string TexFilepath, bool wait);
-	void bind(int index = 0);
-	void unbind(int index = 0);
+	void bind(const int& index = 0);
+	void unbind(const int& index = 0);
 
 
     void setSize(ivec3 size);

@@ -14,13 +14,13 @@ Texture3D::Texture3D(std::string name)
 	this->sName = name;
 }
 
-void Texture3D::bind(int index)
+void Texture3D::bind(const int& index)
 {
 	glActiveTexture(GL_TEXTURE0 + index);
     glBindTexture(GL_TEXTURE_3D, iTextureID);
 }
 
-void Texture3D::unbind(int index)
+void Texture3D::unbind(const int& index)
 {
 	glActiveTexture(GL_TEXTURE0 + index);
     glBindTexture(GL_TEXTURE_3D, 0);

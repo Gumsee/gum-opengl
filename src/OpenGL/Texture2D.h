@@ -23,8 +23,8 @@ public:
     void updateImage();
 	void load(std::string TexFilepath, bool wait);
 	void loadFromMemory(unsigned char* pixels, size_t size);
-	virtual void bind(int index = 0);
-	virtual void unbind(int index = 0);
+	void bind(const int& index = 0);
+	void unbind(const int& index = 0);
 
     float getHeightMapPixel(int x, int y);
     void writeToFile(std::string filename, int filetype);
