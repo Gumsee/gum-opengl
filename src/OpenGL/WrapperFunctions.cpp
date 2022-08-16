@@ -1,10 +1,12 @@
 #include "WrapperFunctions.h"
 #include "HardwareInfo.h"
 #include <Essentials/Tools.h>
+#include <Essentials/Output.h>
 #include <string>
 
 bool gumTexImage2D(const unsigned int& target, const int& level, const int& internalformat, ivec2 size, const int& border, const unsigned int& format, const unsigned int& type, const void* pixels)
 {
+    glUnmapBuffer(GL_TEXTURE_BUFFER);
     #ifdef CHECK_GL_ERRORS
         std::string callInfoStr = " target: " + Tools::decToHex(target) + ", level: " + std::to_string(level) + ", internalformat: " + Tools::decToHex(internalformat) + 
                                     ", size: " + size.toString() + ", border: " + std::to_string(border) + 
@@ -24,15 +26,57 @@ bool gumTexImage2D(const unsigned int& target, const int& level, const int& inte
         if(format == GL_DEPTH_COMPONENT && !Tools::isInList(internalformat, { GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT16, GL_DEPTH_COMPONENT24, 
                                                                                 GL_DEPTH_COMPONENT32F}))
                                                         { Gum::Output::error("glTexImage2D: Texture format is GL_DEPTH_COMPONENT and internalformat is invalid." + callInfoStr); }
+
+                                                    
+        while(glGetError() != GL_NO_ERROR) { } //Empty errors
     #endif
+
 
     glTexImage2D(target, level, internalformat, size.x, size.y, border, format, type, pixels);
     #ifdef CHECK_GL_ERRORS
-        switch(glGetError())
+        GLenum err;
+        while((err = glGetError()) != GL_NO_ERROR)
         {
-            case GL_INVALID_ENUM: Gum::Output::error("glTexImage2D: GL_INVALID_ENUM Texture has invalid type or target" + callInfoStr); return false; break;
-            case GL_INVALID_VALUE: Gum::Output::error("glTexImage2D: GL_INVALID_VALUE" + callInfoStr); return false;  break;
-            case GL_INVALID_OPERATION: Gum::Output::error("glTexImage2D: GL_INVALID_OPERATION" + callInfoStr); return false; break;
+            switch(err)
+            {
+                case GL_INVALID_ENUM: Gum::Output::error("glTexImage2D: GL_INVALID_ENUM Texture has invalid type or target" + callInfoStr); return false; break;
+                case GL_INVALID_VALUE: Gum::Output::error("glTexImage2D: GL_INVALID_VALUE" + callInfoStr); return false;  break;
+                case GL_INVALID_OPERATION: Gum::Output::error("glTexImage2D: GL_INVALID_OPERATION" + callInfoStr); return false; break;
+            }
+        }
+    #endif
+    return true;
+}
+
+bool gumPixelStorei(const GLenum& pname, const GLint& param)
+{
+    #ifdef CHECK_GL_ERRORS
+        while(glGetError() != GL_NO_ERROR) { } //Empty errors
+    #endif
+    glPixelStorei(pname, param);
+    #ifdef CHECK_GL_ERRORS
+        GLenum err = glGetError();
+        if(err != GL_NO_ERROR)
+        {
+            Gum::Output::error("glPixelStorei: " + Tools::decToHex(err));
+            return false;
+        }
+    #endif
+    return true;
+}
+
+bool gumGenTextures(const GLsizei& n, GLuint* textures)
+{
+    #ifdef CHECK_GL_ERRORS
+        while(glGetError() != GL_NO_ERROR) { } //Empty errors
+    #endif
+    glGenTextures(n, textures);
+    #ifdef CHECK_GL_ERRORS
+        GLenum err = glGetError();
+        if(err != GL_NO_ERROR)
+        {
+            Gum::Output::error("glGenTextures: " + Tools::decToHex(err));
+            return false;
         }
     #endif
     return true;

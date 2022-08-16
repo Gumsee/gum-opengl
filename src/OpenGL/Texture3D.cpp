@@ -1,5 +1,4 @@
 #include "Texture3D.h"
-#include "TextureLoader.h"
 #include <GL/glew.h>
 #include <iostream>
 #include <future>
@@ -28,36 +27,15 @@ void Texture3D::unbind(const int& index)
 
 void Texture3D::load(std::string TexFilepath, bool wait)
 { 
-    auto future = std::async(std::launch::async, [TexFilepath, wait, this] {
-        TextureLoader::ImageData<unsigned char> imageData = TextureLoader::loadImage(TexFilepath);
-        setSize(ivec3(imageData.width, imageData.height, 0));
-
-        std::vector<unsigned char> pixels;
-        for(int i = 0; i < imageData.width * imageData.height * 4; i++)
-        {
-            pixels.push_back(imageData.data[i]);
-        }
-        setData(pixels);
-        updateImage();
-        if(!wait)
-            vTexturesToLoad.push_back(this);
-        markLoaded();
-    });
-
-    if(wait)
-    {
-        future.wait();
-        updateImage();
-    }
 }
 
 void Texture3D::updateImage()
 {
     bind(0);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     
     glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA, v3Size.x, v3Size.y, v3Size.z, 0, GL_RGBA, GL_UNSIGNED_BYTE, &vPixelData[0]);
     unbind(0);

@@ -1,4 +1,5 @@
 #include "Texture.h"
+#include "WrapperFunctions.h"
 #include <GL/glew.h>
 #include <iostream>
 
@@ -9,7 +10,7 @@ Texture::Texture()
 	this->bLoaded = false;
 	this->bIsGrayscale = false;
 	this->iTextureID = 0;
-    glGenTextures(1, &iTextureID);
+    gumGenTextures(1, &iTextureID);
 	this->sName = "EmptyTexture";
 }
 

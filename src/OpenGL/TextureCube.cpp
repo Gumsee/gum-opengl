@@ -1,9 +1,9 @@
 #include "TextureCube.h"
-#include "TextureLoader.h"
 #include <GL/glew.h>
 #include <Essentials/Output.h>
 #include <future>
 #include "WrapperFunctions.h"
+#include <Essentials/Filesystem/TextureLoader.h>
 
 TextureCube::TextureCube(std::string name)
 {
@@ -66,13 +66,7 @@ void TextureCube::load(std::vector<std::string> texturepaths, bool wait)
 			TextureLoader::ImageData<unsigned char> imageData = TextureLoader::loadImage(texturepaths[i]);
 			v2Size[i] = ivec2(imageData.width, imageData.height);
 			iChannels[i] = imageData.numComps;
-
-			std::vector<unsigned char> pixels;
-			for(int i = 0; i < imageData.width * imageData.height * iChannels[i]; i++)
-			{
-				pixels.push_back(imageData.data[i]);
-			}
-			setData(pixels, i);
+			vPixelData[i] = imageData.data;
 		}
 
 		updateImage();
@@ -81,15 +75,16 @@ void TextureCube::load(std::vector<std::string> texturepaths, bool wait)
         markLoaded();
     });
 
+
+
     if(wait)
     {
         future.wait();
         updateImage();
     }
-
 }
 	
-void TextureCube::setData(std::vector<unsigned char> data, const unsigned int& side)
+void TextureCube::setData(unsigned char* data, const unsigned int& side)
 {
 	vPixelData[side] = data;
 }
