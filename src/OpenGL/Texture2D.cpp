@@ -14,6 +14,8 @@ Texture2D::Texture2D(std::string name)
 	this->iType = TEXTURE2D;
 	this->sName = name;
 	this->iChannels = 4;
+    this->vPixelData = nullptr;
+    
     bind(0);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -24,7 +26,8 @@ Texture2D::Texture2D(std::string name)
 
 Texture2D::~Texture2D()
 {
-    free(vPixelData);
+    if(bNeedsFreeing && vPixelData != nullptr)
+        free(vPixelData);
 }
 
 float Texture2D::getHeightMapPixel(int x, int y)
@@ -62,6 +65,7 @@ void Texture2D::load(std::string TexFilepath, bool wait)
         setSize(ivec2(imageData.width, imageData.height));
         iChannels = imageData.numComps;
         vPixelData = imageData.data;
+        bNeedsFreeing = true;
 
         updateImage();
         if(!wait)
@@ -82,6 +86,7 @@ void Texture2D::loadFromMemory(unsigned char* pixels, size_t size)
     setNumChannels(imageData.numComps);
     setSize(ivec2(imageData.width, imageData.height));
     vPixelData = imageData.data;
+    bNeedsFreeing = true;
 
     updateImage();
 }

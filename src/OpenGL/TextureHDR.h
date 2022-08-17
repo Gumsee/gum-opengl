@@ -5,10 +5,11 @@ class TextureHDR : public Texture2D
 {
 protected:
 	const int MAX_PIXEL_COLOR = 256 * 256 * 256;
-    float* vfPixelData;
+    float* afPixelData;
 
 public:
 	TextureHDR(std::string name);
+	~TextureHDR();
 
     void updateImage();
 	void load(std::string TexFilepath, bool wait);

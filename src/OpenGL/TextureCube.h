@@ -8,10 +8,12 @@ protected:
 	ivec2 v2Size[6];
     unsigned char* vPixelData[6];
 	int iChannels[6];
+	bool bNeedsFreeing[6];
 
 
 public:
 	TextureCube(std::string name);
+	~TextureCube();
 
 	void bind(const int& index = 0);
 	void unbind(const int& index = 0);

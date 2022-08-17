@@ -13,7 +13,7 @@ protected:
 public:
 	Texture2D();
 	Texture2D(std::string name);
-	~Texture2D();
+	virtual ~Texture2D();
 
     void updateImage();
 	void load(std::string TexFilepath, bool wait);

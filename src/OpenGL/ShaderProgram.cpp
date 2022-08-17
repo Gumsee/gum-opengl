@@ -1,4 +1,5 @@
 #include "ShaderProgram.h"
+#include "Essentials/MemoryManagement.h"
 #include <iostream>
 #include <vector>
 #include <Essentials/Output.h>
@@ -7,13 +8,21 @@
 ShaderProgram* ShaderProgram::pCurrentlyBoundShaderProgram = nullptr;
 
 //The : _numAttributes(0) ect. is an initialization list. It is a better way to initialize variables, since it avoids an extra copy. 
-ShaderProgram::ShaderProgram()  {}
+ShaderProgram::ShaderProgram()  
+{
+
+}
+
 ShaderProgram::~ShaderProgram() 
 {
-	Locations.clear();
-	vShaders.clear();
 	if(this->iProgramID != 0)
 		glDeleteProgram(this->iProgramID);
+	
+	for(size_t i = 0; i < vShaders.size(); i++)
+		Gum::_delete(vShaders[i]);
+
+	Locations.clear();
+	vShaders.clear();
 }
 
 //Compiles the shaders into a form that your GPU can understand
@@ -104,6 +113,7 @@ void ShaderProgram::unuse() { glUseProgram(0);          setCurrentlyBoundShader(
 
 int ShaderProgram::GetUniformLocation(const std::string& UniformName) { return glGetUniformLocation(iProgramID, UniformName.c_str()); }
 void ShaderProgram::addShader(Shader* shader) { this->vShaders.push_back(shader); }
+void ShaderProgram::removeShader(int index) { this->vShaders.erase(vShaders.begin() + index); }
 
 void ShaderProgram::build(const std::string& name, std::map<const char*, unsigned int> attributes)
 {

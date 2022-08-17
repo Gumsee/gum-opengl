@@ -1,6 +1,7 @@
 #include <GL/glew.h>
 #include <Essentials/Output.h>
 #include <Essentials/Tools.h>
+#include <Essentials/MemoryManagement.h>
 #include "Framebuffer.h"
 #include "WrapperFunctions.h"
 #include <algorithm>
@@ -29,14 +30,9 @@ Framebuffer::~Framebuffer()
 {
 	glDeleteFramebuffers(1, &this->framebufferID);
     for(size_t i = 0; i < vTextureAttachments.size(); i++)
-    {
-        if(vTextureAttachments[i] != nullptr)
-            delete vTextureAttachments[i];
-        vTextureAttachments[i] = nullptr;
-    }
-    if(pDepthTexture != nullptr)
-        delete pDepthTexture;
-    pDepthTexture = nullptr;
+        Gum::_delete(vTextureAttachments[i]);
+
+    Gum::_delete(pDepthTexture);
 }
 
 void Framebuffer::bind()
@@ -186,7 +182,6 @@ void Framebuffer::addDepthAttachment()
 {
     if(this->iDepthBufferID == 0)
     {
-        std::cout << "adding depth" << std::endl;
         bind();
         glGenRenderbuffers(1, &this->iDepthBufferID);
         glBindRenderbuffer(GL_RENDERBUFFER, this->iDepthBufferID);

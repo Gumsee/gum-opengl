@@ -53,6 +53,7 @@ public:
 	void rebuild();
 
 	void addShader(Shader* shader);
+	void removeShader(int index);
 
 
 	//Setter

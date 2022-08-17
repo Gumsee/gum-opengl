@@ -10,6 +10,7 @@ protected:
 	unsigned int iType;
 	std::string sName;
 	bool bLoaded;
+	bool bNeedsFreeing;
     bool bIsGrayscale;
 
 	static std::vector<Texture*> vTexturesToLoad;

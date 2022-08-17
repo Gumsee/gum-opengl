@@ -9,6 +9,12 @@ TextureCube::TextureCube(std::string name)
 {
 	this->iType = TEXTURECUBE;
 	this->sName = name;
+	for(int i = 0; i < 0; i++)
+	{
+		bNeedsFreeing[i] = false;
+    	vPixelData[i] = nullptr;
+		iChannels[i] = 0;
+	}
     bind(0);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -16,6 +22,15 @@ TextureCube::TextureCube(std::string name)
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     unbind();
+}
+
+TextureCube::~TextureCube()
+{
+	for(int i = 0; i < 0; i++)
+	{
+		if(bNeedsFreeing[i] && vPixelData[i] != nullptr)
+			free(vPixelData[i]);
+	}
 }
 
 void TextureCube::bind(const int& index)
@@ -67,6 +82,7 @@ void TextureCube::load(std::vector<std::string> texturepaths, bool wait)
 			v2Size[i] = ivec2(imageData.width, imageData.height);
 			iChannels[i] = imageData.numComps;
 			vPixelData[i] = imageData.data;
+			bNeedsFreeing[i] = true;
 		}
 
 		updateImage();

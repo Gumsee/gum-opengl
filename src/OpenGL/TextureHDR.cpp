@@ -9,12 +9,21 @@ TextureHDR::TextureHDR(std::string name)
 {
 	this->iType = TEXTUREHDR;
 	this->sName = name;
+    afPixelData = nullptr;
+    
     bind(0);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     unbind(0);
+
+}
+
+TextureHDR::~TextureHDR()
+{
+    if(bNeedsFreeing && afPixelData != nullptr)
+        free(afPixelData);
 }
 
 void TextureHDR::load(std::string TexFilepath, bool wait)
@@ -23,8 +32,9 @@ void TextureHDR::load(std::string TexFilepath, bool wait)
         TextureLoader::ImageData<float> imageData = TextureLoader::loadHDR(TexFilepath);
         setSize(ivec2(imageData.width, imageData.height));
 
-        vfPixelData = imageData.data;
+        afPixelData = imageData.data;
         iChannels = imageData.numComps;
+        bNeedsFreeing = true;
         
         updateImage();
         if(!wait)
@@ -52,21 +62,21 @@ void TextureHDR::updateImage()
         case 4:  pixelformat = GL_RGBA; pixelinternalformat = GL_RGBA32F; break;
     }
     
-    gumTexImage2D(GL_TEXTURE_2D, 0, pixelinternalformat, v2Size, 0, pixelformat, GL_FLOAT, &vfPixelData[0]);
+    gumTexImage2D(GL_TEXTURE_2D, 0, pixelinternalformat, v2Size, 0, pixelformat, GL_FLOAT, &afPixelData[0]);
     unbind(0);
 }
 
 //
 // Setter
 //
-void TextureHDR::setData(float* data)  { this->vfPixelData = data; }
+void TextureHDR::setData(float* data)  { this->afPixelData = data; }
 void TextureHDR::setPixel(int x, int y, vec4 color) 
 { 
     int pos = v2Size.x * y + x;
-    vfPixelData[pos + 0] = color.x;
-    vfPixelData[pos + 1] = color.y;
-    vfPixelData[pos + 2] = color.z;
-    vfPixelData[pos + 3] = color.w; 
+    afPixelData[pos + 0] = color.x;
+    afPixelData[pos + 1] = color.y;
+    afPixelData[pos + 2] = color.z;
+    afPixelData[pos + 3] = color.w; 
 }
 
 
@@ -74,9 +84,9 @@ void TextureHDR::setPixel(int x, int y, vec4 color)
 // Getter
 //
 ivec2 TextureHDR::getSize() 						        { return this->v2Size; }
-const float* TextureHDR::getPixelPtr() 	        { return &this->vfPixelData[0]; }
+const float* TextureHDR::getPixelPtr() 	        { return &this->afPixelData[0]; }
 vec4 TextureHDR::getPixel(int x, int y) 	        
 { 
     int pos = v2Size.x * y + x;
-    return vec4(vfPixelData[pos + 0], vfPixelData[pos + 1], vfPixelData[pos + 2], vfPixelData[pos + 3]);
+    return vec4(afPixelData[pos + 0], afPixelData[pos + 1], afPixelData[pos + 2], afPixelData[pos + 3]);
 }

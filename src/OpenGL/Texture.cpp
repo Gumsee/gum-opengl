@@ -8,6 +8,7 @@ std::vector<Texture*> Texture::vTexturesToLoad;
 Texture::Texture()
 {
 	this->bLoaded = false;
+	this->bNeedsFreeing = false;
 	this->bIsGrayscale = false;
 	this->iTextureID = 0;
     gumGenTextures(1, &iTextureID);
