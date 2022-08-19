@@ -64,5 +64,6 @@ public:
 	std::string getName() const;
 	GLuint getProgramID() const;
 	static ShaderProgram* getCurrentlyBoundShader();
+	Shader* getShader(int index);
 };
 

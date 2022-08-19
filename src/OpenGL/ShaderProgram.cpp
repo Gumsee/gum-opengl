@@ -174,3 +174,4 @@ void ShaderProgram::setCurrentlyBoundShader(ShaderProgram* program) { pCurrently
 std::string ShaderProgram::getName() const           				{ return sName; }
 GLuint ShaderProgram::getProgramID() const           				{ return iProgramID; }
 ShaderProgram* ShaderProgram::getCurrentlyBoundShader() 			{ return pCurrentlyBoundShaderProgram; }
+Shader* ShaderProgram::getShader(int index) 						{ return this->vShaders[index]; }
