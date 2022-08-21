@@ -81,3 +81,9 @@ bool gumGenTextures(const GLsizei& n, GLuint* textures)
     #endif
     return true;
 }
+
+bool gumScissor(bbox2i bbox)
+{
+    glScissor(bbox.pos.x, bbox.pos.y, bbox.size.x, bbox.size.y);
+    return true;
+}
