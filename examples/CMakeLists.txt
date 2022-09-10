@@ -3,33 +3,58 @@ set (CMAKE_CXX_STANDARD 17)
 set (CMAKE_CXX_STANDARD_REQUIRED ON)
 set (CMAKE_CXX_EXTENSIONS ON)
 set (INSTALL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/dist/${CMAKE_BUILD_TYPE}/bin/")
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -g3 -Wall -Wextra -Wno-pedantic -Wno-unused-but-set-variable -Wno-unused-parameter")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -g3 -Wall -Wextra -Wno-pedantic -Wno-unused-parameter")
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0") #Optimization
 
 message(STATUS "Examples: CXXFLAGS: ${CMAKE_CXX_FLAGS}")
 
-link_directories(${CMAKE_SOURCE_DIR}/lib/)
+list(APPEND GUM_LIBRARIES \"${CMAKE_PROJECT_NAME}\" ${CMAKE_THREAD_LIBS_INIT})
+
+ 
+if(OPENGL_FOUND)
+    list(APPEND GUM_LIBRARIES "${OPENGL_LIBRARIES}")
+endif()
+              
+if(GLEW_FOUND)
+    list(APPEND GUM_LIBRARIES "${GLEW_LIBRARIES}")
+endif()
+              
+if(GUMMATHS_FOUND)
+    list(APPEND GUM_LIBRARIES "${GUMMATHS_LIBRARIES}")
+endif()
+              
+if(GUMESSENTIALS_FOUND)
+    list(APPEND GUM_LIBRARIES "${GUMESSENTIALS_LIBRARIES}")
+endif()
+             
 
 include_directories(${CMAKE_SOURCE_DIR}/src/)
-include_directories(${GUMMATH_DIRECTORY})
-include_directories(${GUMESSENTIALS_DIRECTORY})
+ 
+if(OPENGL_FOUND)
+    include_directories(${OPENGL_INCLUDE_DIRS})
+endif()
+              
+if(GLEW_FOUND)
+    include_directories(${GLEW_INCLUDE_DIRS})
+endif()
+              
+if(GUMMATHS_FOUND)
+    include_directories(${GUMMATHS_INCLUDE_DIRS})
+endif()
+              
+if(GUMESSENTIALS_FOUND)
+    include_directories(${GUMESSENTIALS_INCLUDE_DIRS})
+endif()
+             
 
-add_definitions(-DEXAMPLES_PATH=\"${CMAKE_SOURCE_DIR}/examples/\")
+link_directories(${CMAKE_BINARY_DIR}/src/)
 
-set(EXAMPLE_FILE_LIST 
-    ObjectConversion
-)
+add_definitions(-DEXAMPLES_PATH=\"${CMAKE_SOURCE_DIR}/examples\")
 
-set(GUMOPENGL_LIBRARIES 
-    GumEssentials
-    GumMaths
-    GLEW 
-    GL
-    ${CMAKE_THREAD_LIBS_INIT}
-)
+set(EXAMPLE_FILE_LIST ObjectConversion)
 
 foreach(EXAMPLE ${EXAMPLE_FILE_LIST})
     message(STATUS "Adding target ${EXAMPLE}")
     add_executable(Example_${EXAMPLE} "./${EXAMPLE}.cpp")
-    target_link_libraries(Example_${EXAMPLE} ${GUMOPENGL_LIBRARIES})
+    target_link_libraries(Example_${EXAMPLE} "${GUM_LIBRARIES}")
 endforeach()
