@@ -1,6 +1,7 @@
 #include "TextureCube.h"
 #include <GL/glew.h>
-#include <Essentials/Output.h>
+#include <System/IO/Output.h>
+#include <System/MemoryManagement.h>
 #include <future>
 #include "WrapperFunctions.h"
 #include <Essentials/Filesystem/TextureLoader.h>

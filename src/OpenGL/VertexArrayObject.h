@@ -4,7 +4,7 @@
 #include <string>
 #include <GL/glew.h>
 #include <gum-maths.h>
-#include <Essentials/Output.h>
+#include <System/IO/Output.h>
 #include "VertexBufferObject.h"
 
 class VertexArrayObject

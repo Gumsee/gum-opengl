@@ -19,6 +19,10 @@ if(GLEW_FOUND)
     list(APPEND GUM_LIBRARIES "${GLEW_LIBRARIES}")
 endif()
               
+if(GUMOS_FOUND)
+    list(APPEND GUM_LIBRARIES "${GUMOS_LIBRARIES}")
+endif()
+              
 if(GUMMATHS_FOUND)
     list(APPEND GUM_LIBRARIES "${GUMMATHS_LIBRARIES}")
 endif()
@@ -36,6 +40,10 @@ endif()
               
 if(GLEW_FOUND)
     include_directories(${GLEW_INCLUDE_DIRS})
+endif()
+              
+if(GUMOS_FOUND)
+    include_directories(${GUMOS_INCLUDE_DIRS})
 endif()
               
 if(GUMMATHS_FOUND)

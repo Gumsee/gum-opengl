@@ -1,8 +1,8 @@
 #include "ShaderProgram.h"
-#include "Essentials/MemoryManagement.h"
 #include <iostream>
 #include <vector>
-#include <Essentials/Output.h>
+#include <System/IO/Output.h>
+#include <System/MemoryManagement.h>
 #include <fstream>
 
 ShaderProgram* ShaderProgram::pCurrentlyBoundShaderProgram = nullptr;

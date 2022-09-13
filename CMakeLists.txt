@@ -1,5 +1,7 @@
 cmake_minimum_required (VERSION 3.0)
 project(GumOpenGL)
+cmake_policy(SET CMP0072 NEW)
+
 include(CMakePackageConfigHelpers)
 include(GNUInstallDirs)
 
@@ -25,6 +27,8 @@ endif()
 find_package(OpenGL REQUIRED)
               
 find_package(GLEW REQUIRED)
+              
+find_package(GumOS REQUIRED)
               
 find_package(GumMaths REQUIRED)
               

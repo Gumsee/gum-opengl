@@ -3,7 +3,8 @@
 #include <iostream>
 #include <future>
 #include "WrapperFunctions.h"
-#include <Essentials/Output.h>
+#include <System/IO/Output.h>
+#include <System/MemoryManagement.h>
 #include <Essentials/Filesystem/TextureLoader.h>
 #include <Essentials/Tools.h>
 #include <vector>
