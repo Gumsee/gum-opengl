@@ -3,7 +3,12 @@ set (CMAKE_CXX_STANDARD 17)
 set (CMAKE_CXX_STANDARD_REQUIRED ON)
 set (CMAKE_CXX_EXTENSIONS ON)
 set (INSTALL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/dist/${CMAKE_BUILD_TYPE}/bin/")
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -g3 -Wall -Wextra -Wno-unused-parameter -Wno-reorder -Wno-pedantic -fdiagnostics-color=always")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -g3 -Wall -fdiagnostics-color=always")
+if(DEFINED GUM_OS_LINUX)
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra -Wno-unused-parameter -Wno-reorder -Wno-pedantic")
+elseif(DEFINED GUM_OS_WINDOWS)
+
+endif()
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0") #-Og
 
 message(STATUS "${CMAKE_PROJECT_NAME}: CXXFLAGS: ${CMAKE_CXX_FLAGS}")
@@ -64,7 +69,7 @@ install(TARGETS ${CMAKE_PROJECT_NAME}
 install(
     EXPORT ${CMAKE_PROJECT_NAME}Targets
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${CMAKE_PROJECT_NAME}
-    FILE ${CMAKE_PROJECT_NAME}Targets.cmake # Not sure if this is still needed
+    FILE ${CMAKE_PROJECT_NAME}Targets.cmake
 )
 
 configure_package_config_file("Config.cmake.in"
