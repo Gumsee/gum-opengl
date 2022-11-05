@@ -29,7 +29,7 @@ TextureHDR::~TextureHDR()
 void TextureHDR::load(std::string TexFilepath, bool wait)
 { 
     auto future = std::async(std::launch::async, [TexFilepath, wait, this] {
-        TextureLoader::ImageData<float> imageData = TextureLoader::loadHDR(TexFilepath);
+        ImageData<float> imageData = TextureLoader::loadHDR(TexFilepath);
         setSize(ivec2(imageData.width, imageData.height));
 
         afPixelData = imageData.data;

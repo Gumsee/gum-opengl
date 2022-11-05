@@ -28,8 +28,8 @@ if(GLEW_FOUND)
     include_directories(${GLEW_INCLUDE_DIRS})
 endif()
               
-if(GUMOS_FOUND)
-    include_directories(${GUMOS_INCLUDE_DIRS})
+if(GUMSYSTEM_FOUND)
+    include_directories(${GUMSYSTEM_INCLUDE_DIRS})
 endif()
               
 if(GUMMATHS_FOUND)

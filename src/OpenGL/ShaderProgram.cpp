@@ -1,7 +1,7 @@
 #include "ShaderProgram.h"
 #include <iostream>
 #include <vector>
-#include <System/IO/Output.h>
+#include <System/Output.h>
 #include <System/MemoryManagement.h>
 #include <fstream>
 

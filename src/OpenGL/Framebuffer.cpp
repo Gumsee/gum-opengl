@@ -1,5 +1,5 @@
 #include <GL/glew.h>
-#include <System/IO/Output.h>
+#include <System/Output.h>
 #include <System/MemoryManagement.h>
 
 #include <Essentials/Tools.h>

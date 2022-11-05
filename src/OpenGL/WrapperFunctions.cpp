@@ -1,7 +1,7 @@
 #include "WrapperFunctions.h"
-#include "HardwareInfo.h"
+//#include <OS/GLContext.h>
 #include <Essentials/Tools.h>
-#include <System/IO/Output.h>
+#include <System/Output.h>
 #include <System/MemoryManagement.h>
 #include <string>
 
@@ -14,8 +14,8 @@ bool gumTexImage2D(const unsigned int& target, const int& level, const int& inte
                                     ", format: " + Tools::decToHex(format) + ", type: " + Tools::decToHex(type);
         if(size.x < 0)                                   { Gum::Output::error("glTexImage2D: Texture width less than 0" + callInfoStr); }
         if(size.y < 0)                                   { Gum::Output::error("glTexImage2D: Texture height less than 0" + callInfoStr); }
-        if(size.x > Gum::HardwareInfo::MAX_TEXTURE_SIZE) { Gum::Output::error("glTexImage2D: Texture width more than GL_MAX_TEXTURE_SIZE" + callInfoStr); }
-        if(size.y > Gum::HardwareInfo::MAX_TEXTURE_SIZE) { Gum::Output::error("glTexImage2D: Texture height more than GL_MAX_TEXTURE_SIZE" + callInfoStr); }
+        //if(size.x > Gum::GLContext::GLVARS::MAX_TEXTURE_SIZE) { Gum::Output::error("glTexImage2D: Texture width more than GL_MAX_TEXTURE_SIZE" + callInfoStr); }
+        //if(size.y > Gum::GLContext::GLVARS::MAX_TEXTURE_SIZE) { Gum::Output::error("glTexImage2D: Texture height more than GL_MAX_TEXTURE_SIZE" + callInfoStr); }
         if(level < 0)                                    { Gum::Output::error("glTexImage2D: Texture level is less than 0" + callInfoStr); }
         if(Tools::isInList(type, { GL_UNSIGNED_BYTE_3_3_2, GL_UNSIGNED_BYTE_2_3_3_REV, GL_UNSIGNED_SHORT_5_6_5, GL_UNSIGNED_SHORT_5_6_5_REV, 
                                     GL_UNSIGNED_INT_10F_11F_11F_REV}) && format != GL_RGB)

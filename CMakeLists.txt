@@ -28,7 +28,7 @@ find_package(OpenGL REQUIRED)
               
 find_package(GLEW REQUIRED)
               
-find_package(GumOS REQUIRED)
+find_package(GumSystem REQUIRED)
               
 find_package(GumMaths REQUIRED)
               

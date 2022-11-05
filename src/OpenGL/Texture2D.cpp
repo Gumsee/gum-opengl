@@ -3,7 +3,7 @@
 #include <iostream>
 #include <future>
 #include "WrapperFunctions.h"
-#include <System/IO/Output.h>
+#include <System/Output.h>
 #include <System/MemoryManagement.h>
 #include <Essentials/Filesystem/TextureLoader.h>
 #include <Essentials/Tools.h>
@@ -62,11 +62,12 @@ void Texture2D::unbind(const int& index)
 void Texture2D::load(std::string TexFilepath, bool wait)
 { 
     auto future = std::async(std::launch::async, [TexFilepath, wait, this] {
-        TextureLoader::ImageData<unsigned char> imageData = TextureLoader::loadImage(TexFilepath);
+        ImageData<unsigned char> imageData = TextureLoader::loadImage(TexFilepath);
         setSize(ivec2(imageData.width, imageData.height));
         iChannels = imageData.numComps;
         vPixelData = imageData.data;
         bNeedsFreeing = true;
+        bIsGrayscale = (iChannels <= 2);
 
         updateImage();
         if(!wait)
@@ -83,9 +84,10 @@ void Texture2D::load(std::string TexFilepath, bool wait)
 
 void Texture2D::loadFromMemory(unsigned char* pixels, size_t size)
 {
-    TextureLoader::ImageData<unsigned char> imageData = TextureLoader::loadImage(pixels, size);
-    setNumChannels(imageData.numComps);
-    setSize(ivec2(imageData.width, imageData.height));
+    ImageData<unsigned char> imageData = TextureLoader::loadImage(pixels, size);
+    iChannels = imageData.numComps;
+    bIsGrayscale = (iChannels <= 2);
+    v2Size = ivec2(imageData.width, imageData.height);
     vPixelData = imageData.data;
     bNeedsFreeing = true;
 
@@ -119,7 +121,7 @@ void Texture2D::initEmpty()
 // Setter
 //
 void Texture2D::setSize(const ivec2& size)                              { this->v2Size = size; }
-void Texture2D::setData(unsigned char* data)                { this->vPixelData = data; }
+void Texture2D::setData(unsigned char* data)                            { this->vPixelData = data; }
 void Texture2D::setPixel(const int& x, const int& y, const vec4& color) 
 {
     int pos = v2Size.x * y * iChannels + x * iChannels;
