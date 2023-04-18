@@ -62,6 +62,10 @@ public:
         return index;
     }
 
-    unsigned int numVertices();
-    unsigned int getID();
+    //Setter
+    void setVertexCount(const unsigned int& count);
+
+    //Getter
+    unsigned int numVertices() const;
+    unsigned int getID() const;
 };

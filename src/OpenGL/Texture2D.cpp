@@ -5,7 +5,7 @@
 #include "WrapperFunctions.h"
 #include <System/Output.h>
 #include <System/MemoryManagement.h>
-#include <Essentials/Filesystem/TextureLoader.h>
+#include <Codecs/TextureLoader.h>
 #include <Essentials/Tools.h>
 #include <vector>
 

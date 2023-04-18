@@ -41,7 +41,13 @@ unsigned int VertexArrayObject::addElementBuffer(std::vector<unsigned int> indic
     return iIndexBuffer;
 }
 
+//
+// Setter
+//
+void VertexArrayObject::setVertexCount(const unsigned int& count) { this->iVertexCount = count; }
 
-
-unsigned int VertexArrayObject::numVertices() { return this->iVertexCount; }
-unsigned int VertexArrayObject::getID()       { return this->ivaoID; }
+//
+// Getter
+//
+unsigned int VertexArrayObject::numVertices() const { return this->iVertexCount; }
+unsigned int VertexArrayObject::getID() const       { return this->ivaoID; }

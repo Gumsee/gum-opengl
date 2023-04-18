@@ -10,26 +10,36 @@ add_library(${CMAKE_PROJECT_NAME} STATIC ${SRC})
 include_directories(${CMAKE_SOURCE_DIR}/external/)
 
  
-if(OPENGL_FOUND)
-    include_directories(${OPENGL_INCLUDE_DIRS})
-endif()
-              
-if(GLEW_FOUND)
-    include_directories(${GLEW_INCLUDE_DIRS})
-endif()
-              
-if(GUMSYSTEM_FOUND)
-    include_directories(${GUMSYSTEM_INCLUDE_DIRS})
-endif()
-              
-if(GUMMATHS_FOUND)
-    include_directories(${GUMMATHS_INCLUDE_DIRS})
-endif()
-              
-if(GUMESSENTIALS_FOUND)
-    include_directories(${GUMESSENTIALS_INCLUDE_DIRS})
-endif()
-             
+        if(OPENGL_FOUND)
+            include_directories(${OPENGL_INCLUDE_DIRS})
+        else()
+            message(FATAL_ERROR Library for OPENGL cannot not found)
+        endif() 
+        if(GLEW_FOUND)
+            include_directories(${GLEW_INCLUDE_DIRS})
+        else()
+            message(FATAL_ERROR Library for GLEW cannot not found)
+        endif() 
+        if(GUMSYSTEM_FOUND)
+            include_directories(${GUMSYSTEM_INCLUDE_DIRS})
+        else()
+            message(FATAL_ERROR Library for GUMSYSTEM cannot not found)
+        endif() 
+        if(GUMMATHS_FOUND)
+            include_directories(${GUMMATHS_INCLUDE_DIRS})
+        else()
+            message(FATAL_ERROR Library for GUMMATHS cannot not found)
+        endif() 
+        if(GUMESSENTIALS_FOUND)
+            include_directories(${GUMESSENTIALS_INCLUDE_DIRS})
+        else()
+            message(FATAL_ERROR Library for GUMESSENTIALS cannot not found)
+        endif() 
+        if(GUMCODECS_FOUND)
+            include_directories(${GUMCODECS_INCLUDE_DIRS})
+        else()
+            message(FATAL_ERROR Library for GUMCODECS cannot not found)
+        endif()
 
  
 
@@ -43,6 +53,8 @@ install(
     FILES ${HEADERS}
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${CMAKE_PROJECT_NAME}/OpenGL//
 )
+
+
 
 install(TARGETS ${CMAKE_PROJECT_NAME}
     EXPORT ${CMAKE_PROJECT_NAME}Targets

@@ -7,7 +7,7 @@
 class ShaderProgram
 {
 private:
-	void GetAllUniformLocations();
+	void getAllUniformLocations();
 
 	std::vector<Shader*> vShaders;
 	std::map<std::string, int> Locations;
@@ -33,18 +33,18 @@ public:
 	void use();
 	void unuse();
 
-	void LoadUniform(const std::string& uniformName, const bool& var);
-	void LoadUniform(const std::string& uniformName, const vec2& var);
-	void LoadUniform(const std::string& uniformName, const ivec2& var);
-	void LoadUniform(const std::string& uniformName, const vec3& var);
-	void LoadUniform(const std::string& uniformName, const ivec3& var);
-	void LoadUniform(const std::string& uniformName, const vec4& var);
-	void LoadUniform(const std::string& uniformName, const mat4& var);
-	void LoadUniform(const std::string& uniformName, const std::vector<mat4>& var);
-	void LoadUniform(const std::string& uniformName, const float& var);
-	void LoadUniform(const std::string& uniformName, const int& var);
+	void loadUniform(const std::string& uniformName, const bool& var);
+	void loadUniform(const std::string& uniformName, const vec2& var);
+	void loadUniform(const std::string& uniformName, const ivec2& var);
+	void loadUniform(const std::string& uniformName, const vec3& var);
+	void loadUniform(const std::string& uniformName, const ivec3& var);
+	void loadUniform(const std::string& uniformName, const vec4& var);
+	void loadUniform(const std::string& uniformName, const mat4& var);
+	void loadUniform(const std::string& uniformName, const std::vector<mat4>& var);
+	void loadUniform(const std::string& uniformName, const float& var);
+	void loadUniform(const std::string& uniformName, const int& var);
 
-	int GetUniformLocation(const std::string& UniformName);
+	int getUniformLocation(const std::string& UniformName);
 
 	void build(const std::string& name, std::map<const char*, unsigned int> attributes = {
 		{"vertexPosition", 0}, {"TextureCoords", 1}, {"Normals", 2}, {"TransMatrix", 3}, 

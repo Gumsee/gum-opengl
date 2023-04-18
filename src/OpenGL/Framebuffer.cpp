@@ -7,24 +7,28 @@
 #include "WrapperFunctions.h"
 #include <algorithm>
 
-Framebuffer* Framebuffer::pCurrentlyBoundFramebuffer = nullptr;
 
-
-Framebuffer::Framebuffer(const ivec2& size, const vec4& clearcolor)
+Framebuffer::Framebuffer(const ivec2& size, bool iswindow)
 {
-    this->v2Size = size;
     this->v2Offset = ivec2(0,0);
+    this->v2Size = size;
     this->framebufferID = 0;
     this->iDepthBufferID = 0;
     this->pDepthTexture = nullptr;
 
-    glGenFramebuffers(1, &this->framebufferID);
-    
-    bind();
-    glClearColor(clearcolor.x, clearcolor.y, clearcolor.z, clearcolor.w);
-    glDrawBuffer(GL_NONE);
-    //glDrawBuffer(GL_COLOR_ATTACHMENT0);
-    unbind();
+    if(!iswindow)
+    {
+        glGenFramebuffers(1, &this->framebufferID);
+        bind();
+        //glClearColor(clearcolor.x, clearcolor.y, clearcolor.z, clearcolor.w);
+        glDrawBuffer(GL_NONE);
+        glDrawBuffer(GL_COLOR_ATTACHMENT0);
+        unbind();
+    }
+
+    if(CurrentlyBoundFramebuffer == nullptr)
+        CurrentlyBoundFramebuffer = this;
+    updateMatrix();
 }
 
 Framebuffer::~Framebuffer() 
@@ -39,7 +43,7 @@ Framebuffer::~Framebuffer()
 void Framebuffer::bind()
 {
     //glBindTexture(GL_TEXTURE_2D, 0);//To make sure the texture isn't bound
-    pCurrentlyBoundFramebuffer = this;
+    CurrentlyBoundFramebuffer = this;
     glBindFramebuffer(GL_FRAMEBUFFER, this->framebufferID);
     glViewport(this->v2Offset.x, this->v2Offset.y, this->v2Size.x, this->v2Size.y);
 }
@@ -234,6 +238,13 @@ void Framebuffer::checkStatus()
     }
 }
 
+void Framebuffer::updateMatrix()
+{
+    fAspectRatio = (float)v2Size.y / (float)v2Size.x;
+    fAspectRatioWidthToHeight = (float)v2Size.x / (float)v2Size.y;
+    m4ScreenMatrix = Gum::Maths::ortho((float)v2Size.y, (float)v2Size.x, 0.0f, 0.0f, -100.0f, 100.0f);
+}
+
 
 //
 // Setter
@@ -257,7 +268,7 @@ void Framebuffer::setDepthTextureAttachment(Texture2D* depthMap)
 }
 
 void Framebuffer::setOffset(ivec2 offset)               { this->v2Offset = offset; }
-void Framebuffer::setSize(ivec2 size)                   { this->v2Size = size; }
+void Framebuffer::setSize(ivec2 size)                   { this->v2Size = size; updateMatrix(); }
 
 
 //
@@ -270,3 +281,6 @@ int Framebuffer::numTextureAttachments()                { return this->vTextureA
 ivec2 Framebuffer::getSize()                            { return this->v2Size; }
 ivec2 Framebuffer::getOffset()                          { return this->v2Offset; }
 unsigned int Framebuffer::getID()                       { return this->framebufferID; }
+mat4 Framebuffer::getScreenMatrix()                     { return this->m4ScreenMatrix; }
+float Framebuffer::getAspectRatio()        	            { return this->fAspectRatio; }
+float Framebuffer::getAspectRatioWidthToHeight()        { return this->fAspectRatioWidthToHeight; }

@@ -16,14 +16,18 @@ private:
     std::vector<Texture*> vTextureAttachments;
     std::vector<unsigned int> vDrawBuffers;
     Texture2D* pDepthTexture;
+    mat4 m4ScreenMatrix;
+    float fAspectRatio, fAspectRatioWidthToHeight;
 
-    static Framebuffer* pCurrentlyBoundFramebuffer;
 
     void checkStatus();
+    void updateMatrix();
 
 public:
-    Framebuffer(const ivec2& size, const vec4& clearcolor = vec4(0.0f, 0.0f, 0.0f, 0.0f));
+    Framebuffer(const ivec2& size, bool iswindow);
     ~Framebuffer();
+
+    inline static Framebuffer* CurrentlyBoundFramebuffer = nullptr;
 
     void bind();
     void unbind(const ivec2& viewportsize = ivec2(0,0));
@@ -52,4 +56,7 @@ public:
     ivec2 getSize();
     ivec2 getOffset();
     unsigned int getID();
+    mat4 getScreenMatrix();
+    float getAspectRatio();
+    float getAspectRatioWidthToHeight();
 };

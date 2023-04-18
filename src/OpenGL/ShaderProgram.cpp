@@ -91,7 +91,7 @@ void ShaderProgram::addAttribute(const std::string& attributeName, const int& nu
 	Attributes[attributeName] = number;
 }
 
-void ShaderProgram::addUniform(const std::string& Name) { Locations[Name] = GetUniformLocation(Name); }
+void ShaderProgram::addUniform(const std::string& Name) { Locations[Name] = getUniformLocation(Name); }
 void ShaderProgram::addUniform(const std::string& Name, const int& size)
 {
 	for (int i = 0; i < size; i++)
@@ -101,9 +101,9 @@ void ShaderProgram::addUniform(const std::string& Name, const int& size)
 }
 void ShaderProgram::addTexture(const std::string& Name, const int& index)
 {
-    Locations[Name] = GetUniformLocation(Name);
+    Locations[Name] = getUniformLocation(Name);
     use();
-    LoadUniform(Name, index);
+    loadUniform(Name, index);
     unuse();
 }
 
@@ -111,7 +111,7 @@ void ShaderProgram::use()   { glUseProgram(iProgramID); setCurrentlyBoundShader(
 void ShaderProgram::unuse() { glUseProgram(0);          setCurrentlyBoundShader(nullptr); }
 
 
-int ShaderProgram::GetUniformLocation(const std::string& UniformName) { return glGetUniformLocation(iProgramID, UniformName.c_str()); }
+int ShaderProgram::getUniformLocation(const std::string& UniformName) { return glGetUniformLocation(iProgramID, UniformName.c_str()); }
 void ShaderProgram::addShader(Shader* shader) { this->vShaders.push_back(shader); }
 void ShaderProgram::removeShader(int index) { this->vShaders.erase(vShaders.begin() + index); }
 
@@ -149,16 +149,16 @@ void ShaderProgram::rebuild()
     //build();
 }
 
-void ShaderProgram::LoadUniform(const std::string& uniformName, const bool& var) 				{ glUniform1i(Locations[uniformName], var); }
-void ShaderProgram::LoadUniform(const std::string& uniformName, const vec2& var) 				{ glUniform2f(Locations[uniformName], var.x, var.y); }
-void ShaderProgram::LoadUniform(const std::string& uniformName, const ivec2& var) 				{ glUniform2i(Locations[uniformName], var.x, var.y); }
-void ShaderProgram::LoadUniform(const std::string& uniformName, const vec3& var) 				{ glUniform3f(Locations[uniformName], var.x, var.y, var.z); }
-void ShaderProgram::LoadUniform(const std::string& uniformName, const ivec3& var) 		    	{ glUniform3i(Locations[uniformName], var.x, var.y, var.z); }
-void ShaderProgram::LoadUniform(const std::string& uniformName, const vec4& var) 				{ glUniform4f(Locations[uniformName], var.x, var.y, var.z, var.w); }
-void ShaderProgram::LoadUniform(const std::string& uniformName, const mat4& var) 			    { glUniformMatrix4fv(Locations[uniformName], 1, GL_FALSE, &var[0][0]); }
-void ShaderProgram::LoadUniform(const std::string& uniformName, const float& var) 				{ glUniform1f(Locations[uniformName], var); }
-void ShaderProgram::LoadUniform(const std::string& uniformName, const int& var) 				{ glUniform1i(Locations[uniformName], var); }
-void ShaderProgram::LoadUniform(const std::string& uniformName, const std::vector<mat4>& var) 	{ for (size_t i = 0; i < var.size(); i++) { LoadUniform(uniformName + "[" + std::to_string(i) + "]", var[i]); } }
+void ShaderProgram::loadUniform(const std::string& uniformName, const bool& var) 				{ glUniform1i(Locations[uniformName], var); }
+void ShaderProgram::loadUniform(const std::string& uniformName, const vec2& var) 				{ glUniform2f(Locations[uniformName], var.x, var.y); }
+void ShaderProgram::loadUniform(const std::string& uniformName, const ivec2& var) 				{ glUniform2i(Locations[uniformName], var.x, var.y); }
+void ShaderProgram::loadUniform(const std::string& uniformName, const vec3& var) 				{ glUniform3f(Locations[uniformName], var.x, var.y, var.z); }
+void ShaderProgram::loadUniform(const std::string& uniformName, const ivec3& var) 		    	{ glUniform3i(Locations[uniformName], var.x, var.y, var.z); }
+void ShaderProgram::loadUniform(const std::string& uniformName, const vec4& var) 				{ glUniform4f(Locations[uniformName], var.x, var.y, var.z, var.w); }
+void ShaderProgram::loadUniform(const std::string& uniformName, const mat4& var) 			    { glUniformMatrix4fv(Locations[uniformName], 1, GL_FALSE, &var[0][0]); }
+void ShaderProgram::loadUniform(const std::string& uniformName, const float& var) 				{ glUniform1f(Locations[uniformName], var); }
+void ShaderProgram::loadUniform(const std::string& uniformName, const int& var) 				{ glUniform1i(Locations[uniformName], var); }
+void ShaderProgram::loadUniform(const std::string& uniformName, const std::vector<mat4>& var) 	{ for (size_t i = 0; i < var.size(); i++) { loadUniform(uniformName + "[" + std::to_string(i) + "]", var[i]); } }
 
 
 //

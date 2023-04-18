@@ -4,7 +4,7 @@
 #include <System/MemoryManagement.h>
 #include <future>
 #include "WrapperFunctions.h"
-#include <Essentials/Filesystem/TextureLoader.h>
+#include <Codecs/TextureLoader.h>
 
 TextureCube::TextureCube(std::string name)
 {

@@ -7,8 +7,9 @@ check_required_components(@CMAKE_PROJECT_NAME@)
 set(GUMOPENGL_INCLUDE_DIRS   "@CMAKE_INSTALL_FULL_INCLUDEDIR@/@CMAKE_PROJECT_NAME@" )
 find_library(GUMOPENGL_LIBRARIES NAMES @CMAKE_PROJECT_NAME@
     PATHS
-    /usr/lib
-    /usr/local/lib
+    "/usr/lib"
+    "/usr/local/lib"
+    "@CMAKE_INSTALL_FULL_LIBDIR@"
 )
 
 set(GUMOPENGL_FOUND TRUE)

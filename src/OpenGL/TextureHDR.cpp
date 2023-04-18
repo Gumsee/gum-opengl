@@ -3,7 +3,7 @@
 #include <iostream>
 #include <future>
 #include "WrapperFunctions.h"
-#include <Essentials/Filesystem/TextureLoader.h>
+#include <Codecs/TextureLoader.h>
 
 TextureHDR::TextureHDR(std::string name)
 {
