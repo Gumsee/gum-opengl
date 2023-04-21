@@ -24,13 +24,15 @@ private:
     void updateMatrix();
 
 public:
-    Framebuffer(const ivec2& size, bool iswindow);
+    Framebuffer(const ivec2& size, bool iswindow = false);
     ~Framebuffer();
 
     inline static Framebuffer* CurrentlyBoundFramebuffer = nullptr;
+    inline static Framebuffer* WindowFramebuffer = nullptr;
 
     void bind();
-    void unbind(const ivec2& viewportsize = ivec2(0,0));
+    static void unbind(const ivec2& viewportsize = ivec2(0,0));
+    void resetViewport();
 
     Texture2D* addTextureAttachment(unsigned int index = 0, std::string name = "framebufferTexture", int type = GL_RGBA, int internalType = GL_RGBA, int datatype = GL_UNSIGNED_BYTE);
     TextureCube* addCubeTextureAttachment(unsigned int index = 0, std::string name = "framebufferCubeTexture", int type = GL_RGBA, int internalType = GL_RGBA, int datatype = GL_UNSIGNED_BYTE);

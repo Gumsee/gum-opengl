@@ -25,9 +25,13 @@ Framebuffer::Framebuffer(const ivec2& size, bool iswindow)
         glDrawBuffer(GL_COLOR_ATTACHMENT0);
         unbind();
     }
+    else if(WindowFramebuffer == nullptr)
+    {
+        WindowFramebuffer = this;
+    }
 
     if(CurrentlyBoundFramebuffer == nullptr)
-        CurrentlyBoundFramebuffer = this;
+        bind();
     updateMatrix();
 }
 
@@ -45,14 +49,22 @@ void Framebuffer::bind()
     //glBindTexture(GL_TEXTURE_2D, 0);//To make sure the texture isn't bound
     CurrentlyBoundFramebuffer = this;
     glBindFramebuffer(GL_FRAMEBUFFER, this->framebufferID);
-    glViewport(this->v2Offset.x, this->v2Offset.y, this->v2Size.x, this->v2Size.y);
+    resetViewport();
 }
 
 void Framebuffer::unbind(const ivec2& viewportsize)
 {
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    if(viewportsize != ivec2(0,0))
-        glViewport(0, 0, viewportsize.x, viewportsize.y);
+    CurrentlyBoundFramebuffer = WindowFramebuffer; // Dont check for nullptr
+    if(WindowFramebuffer != nullptr)
+    {
+        WindowFramebuffer->bind();
+    }
+    else
+    {
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        if(viewportsize != ivec2(0,0))
+            glViewport(0, 0, viewportsize.x, viewportsize.y);
+    }
 }
 
 
@@ -243,6 +255,12 @@ void Framebuffer::updateMatrix()
     fAspectRatio = (float)v2Size.y / (float)v2Size.x;
     fAspectRatioWidthToHeight = (float)v2Size.x / (float)v2Size.y;
     m4ScreenMatrix = Gum::Maths::ortho((float)v2Size.y, (float)v2Size.x, 0.0f, 0.0f, -100.0f, 100.0f);
+}
+
+void Framebuffer::resetViewport()
+{
+    glViewport(this->v2Offset.x, this->v2Offset.y, this->v2Size.x, this->v2Size.y);
+    glScissor(0.0f, 0.0f, getSize().x, getSize().y);
 }
 
 
