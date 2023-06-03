@@ -20,7 +20,7 @@ public:
         GEOMETRY_SHADER                = GL_GEOMETRY_SHADER,
     };
 
-    inline static const std::string SHADER_VERSION_STR = "#version 330 core \n";
+    inline static const std::string SHADER_VERSION_STR = "#version 450 core \n";
 
     Shader(std::string sourcecode, int shadertype);
     ~Shader();

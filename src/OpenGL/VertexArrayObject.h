@@ -5,6 +5,7 @@
 #include <GL/glew.h>
 #include <gum-maths.h>
 #include <System/Output.h>
+#include "ElementBufferObject.h"
 #include "VertexBufferObject.h"
 
 class VertexArrayObject
@@ -23,11 +24,11 @@ public:
     void bind();
     void unbind();
 
-    unsigned int addElementBuffer(std::vector<unsigned int> indices, unsigned int usage = GL_STATIC_DRAW);
+    unsigned int addElementBuffer(ElementBufferObject* elembuffer, unsigned int usage = GL_STATIC_DRAW);
 
     template<typename T>
     unsigned int addAttribute(VertexBufferObject<T>* vbo, const unsigned int& index, const unsigned int& dimension, 
-        const unsigned int& type, const size_t& stride, const size_t& offset, const unsigned int& divisor = 0)
+        const unsigned int& type, const size_t& stride = sizeof(T), const size_t& offset = 0, const unsigned int& divisor = 0)
     {
         bind();
         vbo->bind();

@@ -9,20 +9,14 @@
 #include <Essentials/Tools.h>
 #include <vector>
 
-Texture2D::Texture2D() : Texture2D("unknown") {}
-Texture2D::Texture2D(std::string name)
+Texture2D::Texture2D(std::string name, uint16_t datatype)
+    : Texture(TEXTURE2D, datatype)
 {
-	this->iType = TEXTURE2D;
 	this->sName = name;
 	this->iChannels = 4;
     this->vPixelData = nullptr;
-    
-    bind(0);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    unbind(0);
+    repeat();
+    setFiltering(FilteringTypes::LINEAR);
 }
 
 Texture2D::~Texture2D()
@@ -61,24 +55,28 @@ void Texture2D::unbind(const int& index)
 
 void Texture2D::load(std::string TexFilepath, bool wait)
 { 
-    auto future = std::async(std::launch::async, [TexFilepath, wait, this] {
+    std::thread loadThread([TexFilepath, this] {
+        std::lock_guard<decltype(loadMutex)> lock(loadMutex);
+
         ImageData<unsigned char> imageData = TextureLoader::loadImage(TexFilepath);
-        setSize(ivec2(imageData.width, imageData.height));
+        v2Size = ivec2(imageData.width, imageData.height);
         iChannels = imageData.numComps;
         vPixelData = imageData.data;
         bNeedsFreeing = true;
         bIsGrayscale = (iChannels <= 2);
 
-        updateImage();
-        if(!wait)
-            vTexturesToLoad.push_back(this);
+        vToLoadTextures.push_back(this);
         markLoaded();
     });
 
     if(wait)
     {
-        future.wait();
+        loadThread.join();
         updateImage();
+    }
+    else
+    {
+        loadThread.detach();
     }
 }
 
@@ -98,16 +96,20 @@ void Texture2D::updateImage()
 {
     bind(0);
     int pixelformat = GL_RGBA;
+    int pixelinternalformat = GL_RGBA;
+    bool isFloat = iDatatype == Datatypes::FLOAT;
     switch(iChannels) {
-        case 1:  pixelformat = GL_RED;  break;
-        case 2:  pixelformat = GL_RG;   break;
-        case 3:  pixelformat = GL_RGB;  break;
-        case 4:  pixelformat = GL_RGBA; break;
+        case 1:  pixelformat = GL_RED;  pixelinternalformat = isFloat ? GL_R32F    : GL_RED;  break;
+        case 2:  pixelformat = GL_RG;   pixelinternalformat = isFloat ? GL_RG32F   : GL_RG;   break;
+        case 3:  pixelformat = GL_RGB;  pixelinternalformat = isFloat ? GL_RGB32F  : GL_RGB;  break;
+        case 4:  pixelformat = GL_RGBA; pixelinternalformat = isFloat ? GL_RGBA32F : GL_RGBA; break;
     }
     gumPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-    if(!gumTexImage2D(GL_TEXTURE_2D, 0, pixelformat, v2Size, 0, pixelformat, GL_UNSIGNED_BYTE, &vPixelData[0]))
+    if(!gumTexImage2D(GL_TEXTURE_2D, 0, pixelinternalformat, v2Size, 0, pixelformat, iDatatype, &vPixelData[0]))
         Gum::Output::error("Texture2D::updateImage: glTexImage Failed.");
+    if(bIsMipmapped)
+        glGenerateMipmap(GL_TEXTURE_2D);
     unbind(0);
 }
     
@@ -117,16 +119,54 @@ void Texture2D::initEmpty()
     //std::fill(vPixelData.begin(), vPixelData.end(), 255);
 }
 
+
+void Texture2D::repeat(bool mirrored)
+{
+    bind();
+    int repeattype = mirrored ? GL_MIRRORED_REPEAT : GL_REPEAT;
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, repeattype);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, repeattype);
+    unbind();
+}
+
+void Texture2D::clampToEdge(bool border)
+{
+    bind();
+    int clamptype = border ? GL_CLAMP_TO_BORDER : GL_CLAMP_TO_EDGE;
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, clamptype);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, clamptype);
+    unbind();
+}
+
+void Texture2D::setFiltering(FilteringTypes filteringtype) 
+{
+    bind();
+    int filtering = 0;
+    switch(filteringtype)
+    {
+        case Texture::LINEAR:                 filtering = GL_LINEAR; break;
+        case Texture::NEAREST_NEIGHBOR:       filtering = GL_NEAREST; break;
+        case Texture::LINEAR_MIPMAP_LINEAR:   filtering = GL_LINEAR_MIPMAP_LINEAR; break;
+        case Texture::LINEAR_MIPMAP_NEAREST:  filtering = GL_LINEAR_MIPMAP_NEAREST; break;
+        case Texture::NEAREST_MIPMAP_LINEAR:  filtering = GL_NEAREST_MIPMAP_LINEAR; break;
+        case Texture::NEAREST_MIPMAP_NEAREST: filtering = GL_NEAREST_MIPMAP_NEAREST; break;
+    }
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filtering);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filtering);
+    unbind();
+}
+
+
 //
 // Setter
 //
-void Texture2D::setSize(const ivec2& size)                              { this->v2Size = size; }
+void Texture2D::setSize(const ivec2& size)                              { this->v2Size = size; updateImage(); }
 void Texture2D::setData(unsigned char* data)                            { this->vPixelData = data; }
 void Texture2D::setPixel(const int& x, const int& y, const vec4& color) 
 {
     int pos = v2Size.x * y * iChannels + x * iChannels;
     for(unsigned int i = 0; i < iChannels; i++)
-        vPixelData[pos + i] = color[i] * 255;
+        ((unsigned char*)vPixelData)[pos + i] = color[i] * 255;
 }
 void Texture2D::setNumChannels(const int& channels)
 {
@@ -142,14 +182,14 @@ void Texture2D::setNumChannels(const int& channels)
 //
 // Getter
 //
-ivec2 Texture2D::getSize() const				        { return this->v2Size; }
-const unsigned char* Texture2D::getPixelPtr() 	        { return &this->vPixelData[0]; }
+ivec2 Texture2D::getSize() const				{ return this->v2Size; }
+const void* Texture2D::getPixelPtr() 	        { return this->vPixelData; }
 vec4 Texture2D::getPixel(int x, int y) const
 { 
     int pos = v2Size.x * y * iChannels + x * iChannels;
     vec4 retcol;
     for(unsigned int i = 0; i < iChannels; i++)
-        retcol[i] = (float)vPixelData[pos + i] / 255.0f;
+        retcol[i] = (float)((unsigned char*)vPixelData)[pos + i] / 255.0f;
     return retcol;
 }
 int Texture2D::numChannels() const                      { return this->iChannels; }

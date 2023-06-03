@@ -4,6 +4,8 @@
 
 #include <Essentials/Tools.h>
 #include "Framebuffer.h"
+#include "TextureDepth.h"
+#include "TextureHDR.h"
 #include "WrapperFunctions.h"
 #include <algorithm>
 
@@ -12,13 +14,13 @@ Framebuffer::Framebuffer(const ivec2& size, bool iswindow)
 {
     this->v2Offset = ivec2(0,0);
     this->v2Size = size;
-    this->framebufferID = 0;
+    this->iID = 0;
     this->iDepthBufferID = 0;
     this->pDepthTexture = nullptr;
 
     if(!iswindow)
     {
-        glGenFramebuffers(1, &this->framebufferID);
+        glGenFramebuffers(1, &this->iID);
         bind();
         //glClearColor(clearcolor.x, clearcolor.y, clearcolor.z, clearcolor.w);
         glDrawBuffer(GL_NONE);
@@ -37,7 +39,7 @@ Framebuffer::Framebuffer(const ivec2& size, bool iswindow)
 
 Framebuffer::~Framebuffer() 
 {
-	glDeleteFramebuffers(1, &this->framebufferID);
+	glDeleteFramebuffers(1, &this->iID);
     for(size_t i = 0; i < vTextureAttachments.size(); i++)
         Gum::_delete(vTextureAttachments[i]);
 
@@ -48,7 +50,7 @@ void Framebuffer::bind()
 {
     //glBindTexture(GL_TEXTURE_2D, 0);//To make sure the texture isn't bound
     CurrentlyBoundFramebuffer = this;
-    glBindFramebuffer(GL_FRAMEBUFFER, this->framebufferID);
+    glBindFramebuffer(GL_FRAMEBUFFER, this->iID);
     resetViewport();
 }
 
@@ -72,49 +74,45 @@ Texture2D* Framebuffer::addTextureAttachment(unsigned int index, std::string nam
 {
     if(std::find(vDrawBuffers.begin(), vDrawBuffers.end(), index) != vDrawBuffers.end())
     {
-        Gum::Output::warn("Framebuffer: Texture has already been attached to index " + std::to_string(index));
+        Gum::Output::error("Framebuffer: Texture has already been attached to index " + std::to_string(index));
+        return nullptr;
     }
 
-    bind();
-    Texture2D* texture = new Texture2D(name);
-    texture->bind();
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    Texture2D* texture = new Texture2D(name, datatype);
+    texture->setSize(v2Size);
+    texture->clampToEdge();
+    texture->setFiltering(Texture::NEAREST_NEIGHBOR);
+    this->vTextureAttachments.push_back(texture);
 
-    if(!gumTexImage2D(GL_TEXTURE_2D, 0, internalType, this->v2Size, 0, type, datatype, nullptr)) 
-        Gum::Output::error("Framebuffer::addTextureAttachment: glTexImage Failed.");
-    
-    
+    bind();
+    texture->bind();
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, texture->getID(), 0);
     vDrawBuffers.push_back(GL_COLOR_ATTACHMENT0 + index);
 	glDrawBuffers(vDrawBuffers.size(), &vDrawBuffers[0]);
-    
-    unbind();
     texture->unbind();
-    this->vTextureAttachments.push_back(texture);
-        
+    unbind();
+    
     #ifdef CHECK_GL_ERRORS
     checkStatus();
     #endif
     return texture;
 }
 
-TextureCube* Framebuffer::addCubeTextureAttachment(unsigned int index , std::string name, int type, int internalType, int datatype)
+TextureCube* Framebuffer::addCubeTextureAttachment(unsigned int index, std::string name, int type, int internalType, int datatype)
 {
     if(std::find(vDrawBuffers.begin(), vDrawBuffers.end(), index) != vDrawBuffers.end())
     {
-        Gum::Output::warn("Framebuffer: Texture has already been attached to index " + std::to_string(index));
+        Gum::Output::error("Framebuffer: Texture has already been attached to index " + std::to_string(index));
+        return nullptr;
     }
 
-    bind();
     TextureCube* texture = new TextureCube(name);
+    texture->clampToEdge();
+    texture->setFiltering(Texture::LINEAR);
     this->vTextureAttachments.push_back(texture);
     //glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, texture->getID(), 0);
 
+    bind();
     texture->bind();
     for (unsigned int i = 0; i < 6; ++i)
 	{
@@ -123,18 +121,11 @@ TextureCube* Framebuffer::addCubeTextureAttachment(unsigned int index , std::str
         //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, texture->getID(), 0);
         drawAttachmentTexture(0, index, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i);
 	}
-
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
     texture->unbind();
 
     //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, GL_TEXTURE_CUBE_MAP_POSITIVE_X, texture->getID(), 0);
     vDrawBuffers.push_back(GL_COLOR_ATTACHMENT0 + index);
 	glDrawBuffers(vDrawBuffers.size(), &vDrawBuffers[0]);
-
     unbind();
         
     #ifdef CHECK_GL_ERRORS
@@ -144,76 +135,85 @@ TextureCube* Framebuffer::addCubeTextureAttachment(unsigned int index , std::str
     return texture;
 }
 
-Texture2D* Framebuffer::addDepthTextureAttachment(std::string name)
+TextureDepth* Framebuffer::addDepthTextureAttachment(std::string name)
 {
-    if(this->pDepthTexture == nullptr)
+    if(this->pDepthTexture != nullptr)
     {
-        bind();
-        this->pDepthTexture = new Texture2D(name);
-        this->pDepthTexture->bind();
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        if(!gumTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, this->v2Size, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 0))
-            Gum::Output::error("Framebuffer::addDepthTextureAttachment: glTexImage Failed.");
-        glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, this->pDepthTexture->getID(), 0);
-        this->pDepthTexture->unbind();
-        unbind();
-        
-        #ifdef CHECK_GL_ERRORS
-        checkStatus();
-        #endif
+        Gum::Output::error("Framebuffer: Depthtexture has already been attached");
+        return pDepthTexture;
     }
+    else if(this->iDepthBufferID != 0)
+    {
+        Gum::Output::error("Framebuffer: Depthattachment has already been attached");
+        return nullptr;
+    }
+
+    bind();
+    pDepthTexture = new TextureDepth(name, Texture::Datatypes::FLOAT);
+    pDepthTexture->bind();
+    pDepthTexture->setSize(v2Size);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, this->pDepthTexture->getID(), 0);
+    pDepthTexture->unbind();
+    unbind();
+    
+    #ifdef CHECK_GL_ERRORS
+    checkStatus();
+    #endif
     return this->pDepthTexture;
 }
 
 
-Texture2D* Framebuffer::addDepthStencilTextureAttachment(std::string name)
+TextureDepth* Framebuffer::addDepthStencilTextureAttachment(std::string name)
 {
-    if(this->pDepthTexture == nullptr)
+    if(this->pDepthTexture != nullptr)
     {
-        bind();
-        Gum::Output::print("Adding stencildepthbuffer to " + this->getTextureAttachment()->getName());
-        this->pDepthTexture = new Texture2D(name);
-        //glDrawBuffer(GL_BACK);
-        this->pDepthTexture->bind();
-        if(!gumTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, this->v2Size, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, NULL))
-            Gum::Output::error("Framebuffer::addDepthStencilTextureAttachment: glTexImage Failed.");
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-        //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
-        glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, this->pDepthTexture->getID(), 0);
-        this->pDepthTexture->unbind();
-        unbind();
-        
-        #ifdef CHECK_GL_ERRORS
-        checkStatus();
-        #endif
+        Gum::Output::error("Framebuffer: Depthtexture has already been attached");
+        return pDepthTexture;
     }
+    else if(this->iDepthBufferID != 0)
+    {
+        Gum::Output::error("Framebuffer: Depthattachment has already been attached");
+        return nullptr;
+    }
+    
+    bind();
+    //Gum::Output::print("Adding stencildepthbuffer to " + this->getTextureAttachment()->getName());
+    this->pDepthTexture = new TextureDepth(name);
+    //glDrawBuffer(GL_BACK);
+    this->pDepthTexture->bind();
+    if(!gumTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, this->v2Size, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, NULL))
+        Gum::Output::error("Framebuffer::addDepthStencilTextureAttachment: glTexImage Failed.");
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, this->pDepthTexture->getID(), 0);
+    this->pDepthTexture->unbind();
+    unbind();
+    
+    #ifdef CHECK_GL_ERRORS
+    checkStatus();
+    #endif
     return this->pDepthTexture;
 }
 
 void Framebuffer::addDepthAttachment()
 {
-    if(this->iDepthBufferID == 0)
-    {
-        bind();
-        glGenRenderbuffers(1, &this->iDepthBufferID);
-        glBindRenderbuffer(GL_RENDERBUFFER, this->iDepthBufferID);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, this->v2Size.x, this->v2Size.y); //GL_DEPTH_COMPONENT24
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, this->iDepthBufferID);
-        unbind();
+    if(this->pDepthTexture != nullptr)
+        Gum::Output::error("Framebuffer: Depthtexture has already been attached");
+    else if(this->iDepthBufferID != 0)
+        Gum::Output::error("Framebuffer: Depthattachment has already been attached");
 
-        #ifdef CHECK_GL_ERRORS
-        checkStatus();
-        #endif
-    }
+
+    bind();
+    glGenRenderbuffers(1, &this->iDepthBufferID);
+    glBindRenderbuffer(GL_RENDERBUFFER, this->iDepthBufferID);
+    //glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, this->v2Size.x, this->v2Size.y);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, this->v2Size.x, this->v2Size.y);
+    //glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, this->iDepthBufferID);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, this->iDepthBufferID);
+    unbind();
+
+    #ifdef CHECK_GL_ERRORS
+    checkStatus();
+    #endif
 }
 
 void Framebuffer::drawAttachmentTexture(const int& textureattachmentindex, const int& colorattachmentindex, const int& target)
@@ -263,6 +263,35 @@ void Framebuffer::resetViewport()
     glScissor(0.0f, 0.0f, getSize().x, getSize().y);
 }
 
+void Framebuffer::resizeTextures()
+{
+    bind();
+    for(size_t i = 0; i < vTextureAttachments.size(); i++)
+    {
+        Texture* texture = vTextureAttachments[i];
+        texture->bind();
+        switch(texture->getType())
+        {
+            case Texture::TEXTURE2D:   ((Texture2D*)texture)->setSize(v2Size); break;
+            case Texture::TEXTURECUBE: ((TextureCube*)texture)->setSize(v2Size); break;
+            case Texture::TEXTUREHDR:  ((TextureHDR*)texture)->setSize(v2Size); break;
+            default: break;
+        }
+        texture->unbind();
+    }
+
+    if(this->iDepthBufferID != 0)
+    {
+        glBindRenderbuffer(GL_RENDERBUFFER, this->iDepthBufferID);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, this->v2Size.x, this->v2Size.y);
+    }
+    else if(this->pDepthTexture != nullptr)
+    {
+        pDepthTexture->setSize(v2Size);
+    }
+    unbind();
+}
+
 
 //
 // Setter
@@ -277,7 +306,7 @@ void Framebuffer::setDepthAttachment(unsigned int attachment)
     unbind();
 }
 
-void Framebuffer::setDepthTextureAttachment(Texture2D* depthMap)
+void Framebuffer::setDepthTextureAttachment(TextureDepth* depthMap)
 {
     this->pDepthTexture = depthMap;
     bind();
@@ -286,19 +315,19 @@ void Framebuffer::setDepthTextureAttachment(Texture2D* depthMap)
 }
 
 void Framebuffer::setOffset(ivec2 offset)               { this->v2Offset = offset; }
-void Framebuffer::setSize(ivec2 size)                   { this->v2Size = size; updateMatrix(); }
+void Framebuffer::setSize(ivec2 size)                   { this->v2Size = size; updateMatrix(); resizeTextures(); }
 
 
 //
 // Getter
 //
 Texture* Framebuffer::getTextureAttachment(int index)   { return this->vTextureAttachments[index]; }
-Texture2D* Framebuffer::getDepthTextureAttachment()     { return this->pDepthTexture; }
+TextureDepth* Framebuffer::getDepthTextureAttachment()  { return this->pDepthTexture; }
 int Framebuffer::getDepthAttachmentID()                 { return this->iDepthBufferID; }
 int Framebuffer::numTextureAttachments()                { return this->vTextureAttachments.size(); }
 ivec2 Framebuffer::getSize()                            { return this->v2Size; }
 ivec2 Framebuffer::getOffset()                          { return this->v2Offset; }
-unsigned int Framebuffer::getID()                       { return this->framebufferID; }
+unsigned int Framebuffer::getID()                       { return this->iID; }
 mat4 Framebuffer::getScreenMatrix()                     { return this->m4ScreenMatrix; }
 float Framebuffer::getAspectRatio()        	            { return this->fAspectRatio; }
 float Framebuffer::getAspectRatioWidthToHeight()        { return this->fAspectRatioWidthToHeight; }

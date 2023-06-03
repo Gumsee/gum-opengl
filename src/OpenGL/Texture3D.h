@@ -10,9 +10,7 @@ protected:
 
 
 public:	
-	Texture3D();
-	Texture3D(std::string name);
-	Texture3D(int id, std::string name);
+	Texture3D(std::string name = "unknown", uint16_t datatype = Datatypes::UNSIGNED_CHAR);
 
     void updateImage();
 	void load(std::string TexFilepath, bool wait);

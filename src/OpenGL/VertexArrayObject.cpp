@@ -31,14 +31,11 @@ void VertexArrayObject::unbind()
 }
 
 
-unsigned int VertexArrayObject::addElementBuffer(std::vector<unsigned int> indices, unsigned int usage)
+unsigned int VertexArrayObject::addElementBuffer(ElementBufferObject* elembuffer, unsigned int usage)
 {
-    glGenBuffers(1, &iIndexBuffer);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, iIndexBuffer);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(indices[0]), &indices[0], usage);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    iVertexCount = indices.size();
-    return iIndexBuffer;
+    iVertexCount = elembuffer->getLength();
+    iIndexBuffer = elembuffer->getID();
+    return elembuffer->getID();
 }
 
 //

@@ -1,12 +1,14 @@
 #pragma once
 #include <Desktop/Window.h>
+#include <string>
 #include "Framebuffer.h"
+#include "System/MemoryManagement.h"
 #include "System/Output.h"
 
 namespace Gum {
 namespace OpenGL
 {
-    void addFramebufferToWindow(Gum::Window* window)
+    static void addFramebufferToWindow(Gum::Window* window)
     {
         Framebuffer* framebuffer = new Framebuffer(window->getSize(), true);
         framebuffer->bind();
@@ -19,9 +21,15 @@ namespace OpenGL
                     framebuffer->setSize(size);
                     framebuffer->resetViewport();
                     break;
+
                 case 1:
                     framebuffer->bind();
-            };   
+                    break;
+
+                case 2:
+                    delete framebuffer;
+                    break;
+            };
         });
     }
 }}

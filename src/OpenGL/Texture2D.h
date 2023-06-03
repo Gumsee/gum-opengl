@@ -11,8 +11,7 @@ protected:
 
 
 public:
-	Texture2D();
-	Texture2D(std::string name);
+	Texture2D(std::string name = "unknown", uint16_t datatype = Datatypes::UNSIGNED_CHAR);
 	virtual ~Texture2D();
 
     void updateImage();
@@ -23,6 +22,11 @@ public:
 
     float getHeightMapPixel(int x, int y);
     void initEmpty();
+    
+    void repeat(bool mirrored = false);
+    void clampToEdge(bool border = false);
+    void createMipmaps();
+    void setFiltering(FilteringTypes filteringtype);
 
 
     //Setter
@@ -33,7 +37,7 @@ public:
 
     //Getter
     ivec2 getSize() const;
-    const unsigned char* getPixelPtr();
+    const void* getPixelPtr();
     vec4 getPixel(int x, int y) const;
     int numChannels() const;
 };

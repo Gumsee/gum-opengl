@@ -1,15 +1,12 @@
 #include "Texture3D.h"
 #include <GL/glew.h>
+#include <cstdint>
 #include <iostream>
 #include <future>
 
-Texture3D::Texture3D()
+Texture3D::Texture3D(std::string name, uint16_t datatype)
+    : Texture(TEXTURE3D, datatype)
 {
-}
-
-Texture3D::Texture3D(std::string name)
-{
-	this->iType = TEXTURE3D;
 	this->sName = name;
 }
 
@@ -37,14 +34,14 @@ void Texture3D::updateImage()
     glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     
-    glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA, v3Size.x, v3Size.y, v3Size.z, 0, GL_RGBA, GL_UNSIGNED_BYTE, &vPixelData[0]);
+    glTexImage3D(GL_TEXTURE_3D, 0, GL_RGBA, v3Size.x, v3Size.y, v3Size.z, 0, GL_RGBA, iDatatype, &vPixelData[0]);
     unbind(0);
 }
 
 //
 // Setter
 //
-void Texture3D::setSize(ivec3 size)                       { this->v3Size = size; }
+void Texture3D::setSize(ivec3 size)                       { this->v3Size = size; updateImage(); }
 void Texture3D::setData(std::vector<unsigned char> data)  { this->vPixelData = data; }
 void Texture3D::setPixel(int x, int y, vec4 color) 
 { 

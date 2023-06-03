@@ -56,13 +56,13 @@ message(STATUS "${CMAKE_PROJECT_NAME}: CXXFLAGS: ${CMAKE_CXX_FLAGS}")
 
  
     find_package(OpenGL REQUIRED) 
-    find_package(GLEW REQUIRED) 
-    find_package(GumSystem REQUIRED) 
-    find_package(GumMaths REQUIRED) 
-    find_package(GumEssentials REQUIRED) 
     find_package(GumCodecs REQUIRED) 
+    find_package(GumPrimitives REQUIRED) 
+    find_package(GumEssentials REQUIRED) 
     find_package(GumDesktop REQUIRED) 
-    find_package(GumGLFW REQUIRED)
+    find_package(GumSystem REQUIRED) 
+    find_package(GumGLFW REQUIRED) 
+    find_package(GumMaths REQUIRED)
 
 #add_definitions(-DDEBUG)
 add_definitions(-DCHECK_GL_ERRORS)

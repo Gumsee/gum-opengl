@@ -1,6 +1,6 @@
 @PACKAGE_INIT@
 
-include("@CMAKE_INSTALL_FULL_LIBDIR@/cmake/@CMAKE_PROJECT_NAME@/@CMAKE_PROJECT_NAME@Targets.cmake")
+#include("@CMAKE_INSTALL_FULL_LIBDIR@/cmake/@CMAKE_PROJECT_NAME@/@CMAKE_PROJECT_NAME@Targets.cmake")
 
 check_required_components(@CMAKE_PROJECT_NAME@)
 

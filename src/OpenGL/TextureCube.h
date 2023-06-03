@@ -1,5 +1,6 @@
 #pragma once
 #include "Texture2D.h"
+#include <cstdint>
 
 class TextureCube : public Texture
 {
@@ -12,14 +13,22 @@ protected:
 
 
 public:
-	TextureCube(std::string name);
+	TextureCube(std::string name = "unknown", uint16_t datatype = Datatypes::UNSIGNED_CHAR);
 	~TextureCube();
 
 	void bind(const int& index = 0);
 	void unbind(const int& index = 0);
+    
+    void repeat(bool mirrored = false);
+    void clampToEdge(bool border = false);
+    void createMipmaps();
+    void setFiltering(FilteringTypes filteringtype);
 	
     void updateImage();
+    void updateImage(int side);
 	void load(std::vector<std::string> texturepaths, bool wait);
 	
     void setData(unsigned char* data, const unsigned int& side);
+    void setSize(ivec2 size, int side);
+    void setSize(ivec2 size);
 };
