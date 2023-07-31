@@ -1,5 +1,6 @@
 #pragma once
 #include <algorithm>
+#include <functional>
 #include <vector>
 #include <string>
 #include <GL/glew.h>
@@ -10,15 +11,32 @@
 
 class VertexArrayObject
 {
+public:
+    struct PrimitiveTypes
+    {
+        static unsigned int TRIANGLES;
+        static unsigned int TRIANGLE_STRIP;
+        static unsigned int LINES;
+        static unsigned int LINE_STRIP;
+        static unsigned int LINE_LOOP;
+        static unsigned int QUADS;
+        static unsigned int QUAD_STRIP;
+    };
+
 private:
     unsigned int ivaoID;
     unsigned int iIndexBuffer;
     unsigned int iVertexCount;
+    unsigned int iRenderCount;
+    unsigned int iPrimitiveType;
     std::vector<unsigned int> vBufferIDs;
 	std::vector<unsigned int> vAttributes;
+    std::function<void()> pOnRenderCountFunc;
+
+    void updateRenderCount();
 
 public:
-    VertexArrayObject();
+    VertexArrayObject(const unsigned int& primitivetype = PrimitiveTypes::TRIANGLES);
     ~VertexArrayObject();
 
     void bind();
@@ -64,9 +82,13 @@ public:
     }
 
     //Setter
+	void setPrimitiveType(const unsigned int& type);
     void setVertexCount(const unsigned int& count);
+    void onRenderCountUpdate(std::function<void()> func);
 
     //Getter
     unsigned int numVertices() const;
+    unsigned int getRenderCount() const;
     unsigned int getID() const;
+    unsigned int getPrimitiveType() const;
 };

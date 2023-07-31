@@ -6,9 +6,26 @@
 #include <Codecs/Scene3DLoader.h>
 #include <string>
 
+Object3D::RenderFunc Object3D::pRenderStripFunc = [](Object3D* obj) {
+    glDrawArraysInstanced(obj->pVertexArrayObject->getPrimitiveType(), 0, obj->pVertexArrayObject->getRenderCount(), obj->vInstances.size());
+};
+Object3D::RenderFunc Object3D::pRenderTessellatedStripFunc = [](Object3D* obj) {
+    glDrawArraysInstanced(GL_PATCHES, 0, obj->pVertexArrayObject->getRenderCount(), obj->vInstances.size());
+};
+Object3D::RenderFunc Object3D::pRenderIndexedFunc = [](Object3D* obj) {
+    glDrawElementsInstanced(obj->pVertexArrayObject->getPrimitiveType(), obj->pVertexArrayObject->getRenderCount(), GL_UNSIGNED_INT, 0, obj->vInstances.size());
+};
+Object3D::RenderFunc Object3D::pRenderTessellatedIndexedFunc = [](Object3D* obj) {
+    glDrawElementsInstanced(GL_PATCHES, obj->pVertexArrayObject->getRenderCount(), GL_UNSIGNED_INT, 0, obj->vInstances.size());
+};
+
+
 Object3D::Object3D()
 {
     pVertexArrayObject = new VertexArrayObject();
+    pVertexArrayObject->onRenderCountUpdate([this]() {
+        selectRenderFunc();
+    });
 
 	//Set attributes
 	this->pShader = nullptr;
@@ -76,26 +93,20 @@ void Object3D::load()
 		//pTransMatricesVBO->setData(vTransforms, GL_STREAM_DRAW);
 		pVertexArrayObject->addAttributeMat4(pTransMatricesVBO, 3, GL_FLOAT, 1);
 
-		pIndividualColorsVBO = new VertexBufferObject<vec3>();
-		pVertexArrayObject->addAttribute(pIndividualColorsVBO, 10, 3, GL_FLOAT, sizeof(vec3), 0, 1);
+		pIndividualColorsVBO = new VertexBufferObject<vec4>();
+		pVertexArrayObject->addAttribute(pIndividualColorsVBO, 10, 4, GL_FLOAT, sizeof(vec4), 0, 1);
 
+        pVertexArrayObject->setVertexCount(pVertexVBO->getLength());
 
-        ElementBufferObject* indexBuffer = new ElementBufferObject();
-        indexBuffer->setData(pMesh->getIndexBuffer());
-        pVertexArrayObject->addElementBuffer(indexBuffer);
-        pVertexArrayObject->unbind();
+        if(pMesh->getIndexBuffer().size() > 0)
+        {
+            ElementBufferObject* indexBuffer = new ElementBufferObject();
+            indexBuffer->setData(pMesh->getIndexBuffer());
+            pVertexArrayObject->addElementBuffer(indexBuffer);
+            pVertexArrayObject->unbind();
+        }
 
-
-		/*
-		Instance *instance = new Instance();
-		instance->parentObject = this;
-		vInstances.push_back(instance);
-		vTransforms.push_back(instance->getMatrix());
-		//Get individual ID
-		createIndividualColor(instance);*/
-		//addInstance();
-		
-		//getFurthestAwayPoint(vInstances[0]);
+        selectRenderFunc();
 	}
 	else
 	{
@@ -104,45 +115,35 @@ void Object3D::load()
 }
 
 
-void Object3D::createIndividualColor(Object3DInstance *instance)
-{
-	vec3 individualColor;
-	individualColor.r = (instance->getID() & 0x000000FF) >>  0;
-	individualColor.g = (instance->getID() & 0x0000FF00) >>  8;
-	individualColor.b = (instance->getID() & 0x00FF0000) >> 16;
-	vIndividualColors.push_back(individualColor / 255.0f);
-	pIndividualColorsVBO->setData(vIndividualColors);
-}
-
 //Rendering stuff
 void Object3D::render()
 {
     renderMesh();
 }
 
+void Object3D::renderID()
+{
+    renderMesh();
+}
+
 void Object3D::renderMesh()
 {
-	//ShaderProgram::getCurrentlyBoundShader()->loadUniform("isInstanced", numInstances() > 1);
-	//ShaderProgram::getCurrentlyBoundShader()->loadUniform("transformationMatrix", getInstance(0)->getMatrix());
-
     pVertexArrayObject->bind();
-    if(renderTessellated)
-        glDrawElementsInstanced(GL_PATCHES, pVertexArrayObject->numVertices(), GL_UNSIGNED_INT, 0, vInstances.size());
-    else
-        glDrawElementsInstanced(GL_TRIANGLES, pVertexArrayObject->numVertices(), GL_UNSIGNED_INT, 0, vInstances.size());
-
+    pRenderFunc(this);
     pVertexArrayObject->unbind();
 }
 
 Object3DInstance* Object3D::addInstance(Object3DInstance* instance)
 {
-	instance->setID(LAST_OBJECT_INSTANCE_ID++);
 	vInstances.push_back(instance);
 	vTransforms.push_back(instance->getMatrix());
 	pTransMatricesVBO->setData(vTransforms, GL_DYNAMIC_DRAW);
+    
+	vIndividualColors.push_back(instance->getIndividualColor());
+	pIndividualColorsVBO->setData(vIndividualColors);
 
-	//Get individual ID
-	createIndividualColor(instance);
+    if(pAddInstanceCallback != nullptr)
+        pAddInstanceCallback(instance);
 
     return instance;
 }
@@ -165,28 +166,44 @@ void Object3D::applyTransformationMatrix(Object3DInstance *inst)
             vTransforms[i] = inst->getMatrix(); // To get rid of
         }
     }
+
     pTransMatricesVBO->setData(vTransforms); //Make more efficient
 }
 
-void Object3D::getFurthestAwayPoint(Object3DInstance *inst)
+void Object3D::selectRenderFunc()
 {
-	if(pMesh != nullptr)
-	{
-		for(unsigned int i = 0; i < pMesh->numVertices(); i++)
-		{
-            float dist = vec3::distance(pMesh->getVertex(i).position * inst->getScale(), vec3(0.0f));
-            if(dist > this->furthestAwayPoint)
-                this->furthestAwayPoint = dist;
-		}
-	}
-}
+    unsigned int type = pVertexArrayObject->getPrimitiveType();
+    bool isStrip = type == VertexArrayObject::PrimitiveTypes::LINE_STRIP 
+                || type == VertexArrayObject::PrimitiveTypes::LINE_LOOP 
+                || type == VertexArrayObject::PrimitiveTypes::TRIANGLE_STRIP 
+                || type == VertexArrayObject::PrimitiveTypes::QUAD_STRIP;
 
+    if(isStrip)
+    {
+        if(bRenderTessellated)
+            pRenderFunc = pRenderTessellatedStripFunc;
+        else
+            pRenderFunc = pRenderStripFunc;
+
+        if(pMesh == nullptr)
+            return;
+    }
+    else
+    {
+        if(bRenderTessellated)
+            pRenderFunc = pRenderTessellatedIndexedFunc;
+        else
+            pRenderFunc = pRenderIndexedFunc;
+    }
+}
 
 //
 //Setter
 //
-void Object3D::setShaderProgram(ShaderProgram *shader) { this->pShader = shader; }
-void Object3D::setName(std::string name) 			   { this->sName = name; }
+void Object3D::setShaderProgram(ShaderProgram *shader)     { this->pShader = shader; }
+void Object3D::setName(const std::string& name) 	       { this->sName = name; }
+void Object3D::renderTessellated(bool tessellated)         { this->bRenderTessellated = tessellated; selectRenderFunc(); }
+void Object3D::onAddInstance(AddInstanceCallback callback) { this->pAddInstanceCallback = callback; }
 
 
 //

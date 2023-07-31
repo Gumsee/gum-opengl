@@ -7,7 +7,7 @@ protected:
 	const unsigned int MAX_PIXEL_COLOR = 256 * 256 * 256;
 	ivec2 v2Size;
     unsigned int iChannels;
-    unsigned char* vPixelData;
+    void* vPixelData;
 
 
 public:

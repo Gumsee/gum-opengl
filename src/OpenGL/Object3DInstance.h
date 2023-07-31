@@ -1,31 +1,33 @@
 #pragma once
 #include <Primitives/Transformable.h>
+#include <Primitives/UniqueID.h>
 
 #define OBJECT3D_INSTANCE_TYPE_BASE 0
 
 class Object3D;
-class Object3DInstance : public Transformable
+class Object3DInstance : public Transformable, public UniqueID
 {
 protected:
     Object3D* pObject = nullptr;
-    unsigned int iID = 0; //Global ID
     unsigned short iType;
+	float fFurthestAwayPoint;
     void* userptr = nullptr;
 	bbox3 bBoundingBox;
 
     void generateBoundingBox();
+	void generateFurthestAwayPoint();
+    
 
 public:
     Object3DInstance(Object3D* obj);
     virtual ~Object3DInstance() {};
 
-    void updateMatrix();
-    virtual void onTransformUpdate() {};
+    void updateMatrix() override;
+    virtual void onTransformUpdate() override {};
 
     void setUserPtr(void* ptr);
-    void setID(unsigned int id);
 
-    unsigned int getID() const;
+    Object3D* getParentObject();
     unsigned short getType() const;
     void* getUserPtr();
 };

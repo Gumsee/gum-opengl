@@ -21,11 +21,10 @@ Framebuffer::Framebuffer(const ivec2& size, bool iswindow)
     if(!iswindow)
     {
         glGenFramebuffers(1, &this->iID);
-        bind();
+        //bind();
         //glClearColor(clearcolor.x, clearcolor.y, clearcolor.z, clearcolor.w);
-        glDrawBuffer(GL_NONE);
-        glDrawBuffer(GL_COLOR_ATTACHMENT0);
-        unbind();
+        //glDrawBuffer(GL_NONE);
+        //glDrawBuffer(GL_COLOR_ATTACHMENT0);
     }
     else if(WindowFramebuffer == nullptr)
     {
@@ -33,15 +32,15 @@ Framebuffer::Framebuffer(const ivec2& size, bool iswindow)
     }
 
     if(CurrentlyBoundFramebuffer == nullptr)
-        bind();
+        CurrentlyBoundFramebuffer = this;
     updateMatrix();
 }
 
 Framebuffer::~Framebuffer() 
 {
 	glDeleteFramebuffers(1, &this->iID);
-    for(size_t i = 0; i < vTextureAttachments.size(); i++)
-        Gum::_delete(vTextureAttachments[i]);
+    for(auto entry : mTextureAttachments)
+        Gum::_delete(entry.second);
 
     Gum::_delete(pDepthTexture);
 }
@@ -82,19 +81,20 @@ Texture2D* Framebuffer::addTextureAttachment(unsigned int index, std::string nam
     texture->setSize(v2Size);
     texture->clampToEdge();
     texture->setFiltering(Texture::NEAREST_NEIGHBOR);
-    this->vTextureAttachments.push_back(texture);
+    this->mTextureAttachments[index] = texture;
 
+    Framebuffer* currFramebuffer = CurrentlyBoundFramebuffer;
     bind();
     texture->bind();
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, texture->getID(), 0);
     vDrawBuffers.push_back(GL_COLOR_ATTACHMENT0 + index);
 	glDrawBuffers(vDrawBuffers.size(), &vDrawBuffers[0]);
     texture->unbind();
-    unbind();
     
     #ifdef CHECK_GL_ERRORS
     checkStatus();
     #endif
+    currFramebuffer->bind();
     return texture;
 }
 
@@ -109,9 +109,10 @@ TextureCube* Framebuffer::addCubeTextureAttachment(unsigned int index, std::stri
     TextureCube* texture = new TextureCube(name);
     texture->clampToEdge();
     texture->setFiltering(Texture::LINEAR);
-    this->vTextureAttachments.push_back(texture);
+    mTextureAttachments[index] = texture;
     //glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, texture->getID(), 0);
 
+    Framebuffer* currFramebuffer = CurrentlyBoundFramebuffer;
     bind();
     texture->bind();
     for (unsigned int i = 0; i < 6; ++i)
@@ -126,11 +127,11 @@ TextureCube* Framebuffer::addCubeTextureAttachment(unsigned int index, std::stri
     //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, GL_TEXTURE_CUBE_MAP_POSITIVE_X, texture->getID(), 0);
     vDrawBuffers.push_back(GL_COLOR_ATTACHMENT0 + index);
 	glDrawBuffers(vDrawBuffers.size(), &vDrawBuffers[0]);
-    unbind();
         
     #ifdef CHECK_GL_ERRORS
     checkStatus();
     #endif
+    currFramebuffer->bind();
 
     return texture;
 }
@@ -148,17 +149,18 @@ TextureDepth* Framebuffer::addDepthTextureAttachment(std::string name)
         return nullptr;
     }
 
+    Framebuffer* currFramebuffer = CurrentlyBoundFramebuffer;
     bind();
     pDepthTexture = new TextureDepth(name, Texture::Datatypes::FLOAT);
     pDepthTexture->bind();
     pDepthTexture->setSize(v2Size);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, this->pDepthTexture->getID(), 0);
     pDepthTexture->unbind();
-    unbind();
     
     #ifdef CHECK_GL_ERRORS
     checkStatus();
     #endif
+    currFramebuffer->bind();
     return this->pDepthTexture;
 }
 
@@ -176,6 +178,7 @@ TextureDepth* Framebuffer::addDepthStencilTextureAttachment(std::string name)
         return nullptr;
     }
     
+    Framebuffer* currFramebuffer = CurrentlyBoundFramebuffer;
     bind();
     //Gum::Output::print("Adding stencildepthbuffer to " + this->getTextureAttachment()->getName());
     this->pDepthTexture = new TextureDepth(name);
@@ -186,11 +189,11 @@ TextureDepth* Framebuffer::addDepthStencilTextureAttachment(std::string name)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, this->pDepthTexture->getID(), 0);
     this->pDepthTexture->unbind();
-    unbind();
     
     #ifdef CHECK_GL_ERRORS
     checkStatus();
     #endif
+    currFramebuffer->bind();
     return this->pDepthTexture;
 }
 
@@ -201,7 +204,7 @@ void Framebuffer::addDepthAttachment()
     else if(this->iDepthBufferID != 0)
         Gum::Output::error("Framebuffer: Depthattachment has already been attached");
 
-
+    Framebuffer* currFramebuffer = CurrentlyBoundFramebuffer;
     bind();
     glGenRenderbuffers(1, &this->iDepthBufferID);
     glBindRenderbuffer(GL_RENDERBUFFER, this->iDepthBufferID);
@@ -209,22 +212,22 @@ void Framebuffer::addDepthAttachment()
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, this->v2Size.x, this->v2Size.y);
     //glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, this->iDepthBufferID);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, this->iDepthBufferID);
-    unbind();
 
     #ifdef CHECK_GL_ERRORS
     checkStatus();
     #endif
+    currFramebuffer->bind();
 }
 
 void Framebuffer::drawAttachmentTexture(const int& textureattachmentindex, const int& colorattachmentindex, const int& target)
 {
+    Framebuffer* currFramebuffer = CurrentlyBoundFramebuffer;
     bind();
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + colorattachmentindex, target, getTextureAttachment(textureattachmentindex)->getID(), 0);
     #ifdef CHECK_GL_ERRORS
     checkStatus();
     #endif
-    
-    //dont unbind automatically
+    currFramebuffer->bind();
 }
 
 void Framebuffer::blitDepthToOtherFramebuffer(Framebuffer* fbo)
@@ -265,10 +268,11 @@ void Framebuffer::resetViewport()
 
 void Framebuffer::resizeTextures()
 {
+    Framebuffer* currFramebuffer = CurrentlyBoundFramebuffer;
     bind();
-    for(size_t i = 0; i < vTextureAttachments.size(); i++)
+    for(auto entry : mTextureAttachments)
     {
-        Texture* texture = vTextureAttachments[i];
+        Texture* texture = entry.second;
         texture->bind();
         switch(texture->getType())
         {
@@ -289,7 +293,7 @@ void Framebuffer::resizeTextures()
     {
         pDepthTexture->setSize(v2Size);
     }
-    unbind();
+    currFramebuffer->bind();
 }
 
 
@@ -299,19 +303,21 @@ void Framebuffer::resizeTextures()
 void Framebuffer::setDepthAttachment(unsigned int attachment)
 {
     this->iDepthBufferID = attachment;
+    Framebuffer* currFramebuffer = CurrentlyBoundFramebuffer;
     bind();
     glBindRenderbuffer(GL_RENDERBUFFER, this->iDepthBufferID);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, this->v2Size.x, this->v2Size.y);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, this->iDepthBufferID);
-    unbind();
+    currFramebuffer->bind();
 }
 
 void Framebuffer::setDepthTextureAttachment(TextureDepth* depthMap)
 {
     this->pDepthTexture = depthMap;
+    Framebuffer* currFramebuffer = CurrentlyBoundFramebuffer;
     bind();
     glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, this->pDepthTexture->getID(), 0);
-    unbind();
+    currFramebuffer->bind();
 }
 
 void Framebuffer::setOffset(ivec2 offset)               { this->v2Offset = offset; }
@@ -321,13 +327,30 @@ void Framebuffer::setSize(ivec2 size)                   { this->v2Size = size; u
 //
 // Getter
 //
-Texture* Framebuffer::getTextureAttachment(int index)   { return this->vTextureAttachments[index]; }
+Texture* Framebuffer::getTextureAttachment(int index)   { return this->mTextureAttachments[index]; }
 TextureDepth* Framebuffer::getDepthTextureAttachment()  { return this->pDepthTexture; }
 int Framebuffer::getDepthAttachmentID()                 { return this->iDepthBufferID; }
-int Framebuffer::numTextureAttachments()                { return this->vTextureAttachments.size(); }
+int Framebuffer::numTextureAttachments()                { return this->mTextureAttachments.size(); }
 ivec2 Framebuffer::getSize()                            { return this->v2Size; }
 ivec2 Framebuffer::getOffset()                          { return this->v2Offset; }
 unsigned int Framebuffer::getID()                       { return this->iID; }
 mat4 Framebuffer::getScreenMatrix()                     { return this->m4ScreenMatrix; }
 float Framebuffer::getAspectRatio()        	            { return this->fAspectRatio; }
 float Framebuffer::getAspectRatioWidthToHeight()        { return this->fAspectRatioWidthToHeight; }
+vec4 Framebuffer::getPixel(ivec2 pos)
+{
+    vec4 pixelcolor;
+    Framebuffer* currFramebuffer = CurrentlyBoundFramebuffer;
+    bind();
+	unsigned char data[4];
+    glReadPixels(pos.x, v2Size.y - pos.y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    
+    pixelcolor.r = (float)data[0];
+    pixelcolor.g = (float)data[1];
+    pixelcolor.b = (float)data[2];
+    pixelcolor.a = (float)data[3];
+
+    currFramebuffer->bind();
+
+    return pixelcolor / 255.0f;
+}

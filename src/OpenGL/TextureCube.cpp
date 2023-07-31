@@ -60,7 +60,7 @@ void TextureCube::updateImage(int side)
         case 4:  pixelformat = GL_RGBA; break;
     }
 
-    if(!gumTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + side, 0, pixelformat, v2Size[side], 0, pixelformat, iDatatype, &(vPixelData[side])[0]))
+    if(!gumTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + side, 0, pixelformat, v2Size[side], 0, pixelformat, iDatatype, vPixelData[side]))
         Gum::Output::error("TextureCube::updateImage: glTexImage Failed.");
     if(bIsMipmapped)
         glGenerateMipmap(GL_TEXTURE_CUBE_MAP_POSITIVE_X + side);
@@ -78,7 +78,7 @@ void TextureCube::load(std::vector<std::string> texturepaths, bool wait)
     auto future = std::async(std::launch::async, [texturepaths, wait, this] {
 		for(size_t i = 0; i < texturepaths.size(); i++)
 		{
-			ImageData<unsigned char> imageData = TextureLoader::loadImage(texturepaths[i]);
+			ImageData imageData = TextureLoader::loadImage(texturepaths[i]);
 			v2Size[i] = ivec2(imageData.width, imageData.height);
 			iChannels[i] = imageData.numComps;
 			vPixelData[i] = imageData.data;

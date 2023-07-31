@@ -1,16 +1,22 @@
 #pragma once
+#include <functional>
 #include <gum-primitives.h>
 #include <Essentials/Settings.h>
 
+#include "Renderable.h"
 #include "ShaderProgram.h"
 #include "VertexArrayObject.h"
 #include "Object3DInstance.h"
 
-class Object3D
+class Object3D : public Renderable
 {
+public:
+    typedef void (*RenderFunc)(Object3D*);
+    typedef std::function<void(Object3DInstance*)> AddInstanceCallback;
+
+
 private:
-    inline static unsigned int LAST_OBJECT_INSTANCE_ID = 0;
-	void createIndividualColor(Object3DInstance *instance);
+    static RenderFunc pRenderStripFunc, pRenderTessellatedStripFunc, pRenderIndexedFunc, pRenderTessellatedIndexedFunc;
 
 protected:
 	Object3D();
@@ -19,28 +25,29 @@ protected:
 	VertexArrayObject* pVertexArrayObject;
     VertexBufferObject<mat4>* pTransMatricesVBO;
     VertexBufferObject<Vertex>* pVertexVBO;
-    VertexBufferObject<vec3>* pIndividualColorsVBO;
+    VertexBufferObject<vec4>* pIndividualColorsVBO;
 
 	std::vector<Object3DInstance*> vInstances;
 	std::vector<mat4> vTransforms;
-	std::vector<vec3> vIndividualColors;
+	std::vector<vec4> vIndividualColors;
     
 	//General
 	bool hasbackface = true;		//Render only one side?
 	bool inverseCulling = false;	//Show insides?
-    bool renderTessellated = false;
-	int ObjectType = 0; 			//TYPE
-	float furthestAwayPoint = 0.0f;
+    bool bRenderTessellated = false;
+
 	std::string sName;				//Object Name
+    RenderFunc pRenderFunc;
+    AddInstanceCallback pAddInstanceCallback;
 
 
 	//Technical	(OpenGL)
 	Mesh *pMesh = nullptr;
 
 
-	void getFurthestAwayPoint(Object3DInstance *inst);
 	void load();
 	Object3DInstance* addInstance(Object3DInstance* instance);
+    void selectRenderFunc();
 
 public:
 	Object3D(std::string ModelFilePath, std::string name);
@@ -49,7 +56,9 @@ public:
 
     void applyTransformationMatrix(Object3DInstance *inst);
 
-	virtual void render();
+    virtual void prerender() override {};
+	virtual void render() override;
+	void renderID() override;
 	void renderMesh();
 
 	Object3DInstance* addInstance();
@@ -58,7 +67,9 @@ public:
 
     //Setter
 	void setShaderProgram(ShaderProgram *shader);
-	void setName(std::string name);
+	void setName(const std::string& name);
+    void renderTessellated(bool tessellated);
+    void onAddInstance(AddInstanceCallback callback);
 
     //Getter
 	std::string getName();

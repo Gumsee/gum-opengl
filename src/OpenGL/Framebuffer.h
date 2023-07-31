@@ -2,6 +2,7 @@
 #include <gum-maths.h>
 #include "TextureDepth.h"
 #include "TextureCube.h"
+#include <unordered_map>
 #include <vector>
 #include <GL/glew.h>
 
@@ -13,7 +14,7 @@ private:
     ivec2 v2Size;
     ivec2 v2Offset;
 
-    std::vector<Texture*> vTextureAttachments;
+    std::unordered_map<uint8_t, Texture*> mTextureAttachments;
     std::vector<unsigned int> vDrawBuffers;
     TextureDepth* pDepthTexture;
     mat4 m4ScreenMatrix;
@@ -62,4 +63,5 @@ public:
     mat4 getScreenMatrix();
     float getAspectRatio();
     float getAspectRatioWidthToHeight();
+    vec4 getPixel(ivec2 pos);
 };

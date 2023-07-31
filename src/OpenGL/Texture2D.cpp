@@ -58,7 +58,7 @@ void Texture2D::load(std::string TexFilepath, bool wait)
     std::thread loadThread([TexFilepath, this] {
         std::lock_guard<decltype(loadMutex)> lock(loadMutex);
 
-        ImageData<unsigned char> imageData = TextureLoader::loadImage(TexFilepath);
+        ImageData imageData = TextureLoader::loadImage(TexFilepath);
         v2Size = ivec2(imageData.width, imageData.height);
         iChannels = imageData.numComps;
         vPixelData = imageData.data;
@@ -82,7 +82,7 @@ void Texture2D::load(std::string TexFilepath, bool wait)
 
 void Texture2D::loadFromMemory(unsigned char* pixels, size_t size)
 {
-    ImageData<unsigned char> imageData = TextureLoader::loadImage(pixels, size);
+    ImageData imageData = TextureLoader::loadImage(pixels, size);
     iChannels = imageData.numComps;
     bIsGrayscale = (iChannels <= 2);
     v2Size = ivec2(imageData.width, imageData.height);
@@ -106,7 +106,7 @@ void Texture2D::updateImage()
     }
     gumPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-    if(!gumTexImage2D(GL_TEXTURE_2D, 0, pixelinternalformat, v2Size, 0, pixelformat, iDatatype, &vPixelData[0]))
+    if(!gumTexImage2D(GL_TEXTURE_2D, 0, pixelinternalformat, v2Size, 0, pixelformat, iDatatype, vPixelData))
         Gum::Output::error("Texture2D::updateImage: glTexImage Failed.");
     if(bIsMipmapped)
         glGenerateMipmap(GL_TEXTURE_2D);
