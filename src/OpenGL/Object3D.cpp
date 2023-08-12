@@ -22,6 +22,7 @@ Object3D::RenderFunc Object3D::pRenderTessellatedIndexedFunc = [](Object3D* obj)
 
 Object3D::Object3D()
 {
+    pIndexBuffer = nullptr;
     pVertexArrayObject = new VertexArrayObject();
     pVertexArrayObject->onRenderCountUpdate([this]() {
         selectRenderFunc();
@@ -67,7 +68,11 @@ Object3D::Object3D(Mesh *mesh, std::string name) : Object3D()
 
 Object3D::~Object3D()
 {
+    Gum::_delete(pIndexBuffer);
 	Gum::_delete(pVertexArrayObject);
+	Gum::_delete(pTransMatricesVBO);
+	Gum::_delete(pIndividualColorsVBO);
+	Gum::_delete(pVertexVBO);
 	for(Object3DInstance *inst : vInstances)
 		Gum::_delete(inst);
 }
@@ -100,9 +105,9 @@ void Object3D::load()
 
         if(pMesh->getIndexBuffer().size() > 0)
         {
-            ElementBufferObject* indexBuffer = new ElementBufferObject();
-            indexBuffer->setData(pMesh->getIndexBuffer());
-            pVertexArrayObject->addElementBuffer(indexBuffer);
+            pIndexBuffer = new ElementBufferObject();
+            pIndexBuffer->setData(pMesh->getIndexBuffer());
+            pVertexArrayObject->addElementBuffer(pIndexBuffer);
             pVertexArrayObject->unbind();
         }
 

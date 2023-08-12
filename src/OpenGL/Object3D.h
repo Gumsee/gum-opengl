@@ -23,6 +23,7 @@ protected:
 
 	ShaderProgram *pShader;
 	VertexArrayObject* pVertexArrayObject;
+    ElementBufferObject* pIndexBuffer;
     VertexBufferObject<mat4>* pTransMatricesVBO;
     VertexBufferObject<Vertex>* pVertexVBO;
     VertexBufferObject<vec4>* pIndividualColorsVBO;

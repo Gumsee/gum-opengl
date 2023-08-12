@@ -14,11 +14,14 @@ class VertexArrayObject
 public:
     struct PrimitiveTypes
     {
+        static unsigned int POINTS;
         static unsigned int TRIANGLES;
         static unsigned int TRIANGLE_STRIP;
+        static unsigned int TRIANGLE_FAN;
         static unsigned int LINES;
         static unsigned int LINE_STRIP;
         static unsigned int LINE_LOOP;
+        static unsigned int LINE_ADJACENCY;
         static unsigned int QUADS;
         static unsigned int QUAD_STRIP;
     };
@@ -74,10 +77,21 @@ public:
     unsigned int addAttributeMat4(VertexBufferObject<T>* vbo, unsigned int index, unsigned int type, const unsigned int& divisor)
     {
         GLsizei vec4Size = sizeof(vec4);
-        addAttribute(vbo, 3, 4, type, 4 * vec4Size, 0 * vec4Size, divisor);
-        addAttribute(vbo, 4, 4, type, 4 * vec4Size, 1 * vec4Size, divisor);
-        addAttribute(vbo, 5, 4, type, 4 * vec4Size, 2 * vec4Size, divisor);
-        addAttribute(vbo, 6, 4, type, 4 * vec4Size, 3 * vec4Size, divisor);
+        addAttribute(vbo, index + 0, 4, type, 4 * vec4Size, 0 * vec4Size, divisor);
+        addAttribute(vbo, index + 1, 4, type, 4 * vec4Size, 1 * vec4Size, divisor);
+        addAttribute(vbo, index + 2, 4, type, 4 * vec4Size, 2 * vec4Size, divisor);
+        addAttribute(vbo, index + 3, 4, type, 4 * vec4Size, 3 * vec4Size, divisor);
+        return index;
+    }
+
+
+    template<typename T>
+    unsigned int addAttributeMat3(VertexBufferObject<T>* vbo, unsigned int index, unsigned int type, const unsigned int& divisor)
+    {
+        GLsizei vec3Size = sizeof(vec3);
+        addAttribute(vbo, index + 0, 3, type, 3 * vec3Size, 0 * vec3Size, divisor);
+        addAttribute(vbo, index + 1, 3, type, 3 * vec3Size, 1 * vec3Size, divisor);
+        addAttribute(vbo, index + 2, 3, type, 3 * vec3Size, 2 * vec3Size, divisor);
         return index;
     }
 

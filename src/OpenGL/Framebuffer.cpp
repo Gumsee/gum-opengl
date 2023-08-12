@@ -255,6 +255,7 @@ void Framebuffer::checkStatus()
 
 void Framebuffer::updateMatrix()
 {
+    v2PixelSize = vec2(1.0f) / (vec2)v2Size;
     fAspectRatio = (float)v2Size.y / (float)v2Size.x;
     fAspectRatioWidthToHeight = (float)v2Size.x / (float)v2Size.y;
     m4ScreenMatrix = Gum::Maths::ortho((float)v2Size.y, (float)v2Size.x, 0.0f, 0.0f, -100.0f, 100.0f);
@@ -354,3 +355,4 @@ vec4 Framebuffer::getPixel(ivec2 pos)
 
     return pixelcolor / 255.0f;
 }
+vec2 Framebuffer::getPixelSize() const          		  { return this->v2PixelSize; }

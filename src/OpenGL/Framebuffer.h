@@ -13,6 +13,7 @@ private:
     unsigned int iDepthBufferID;
     ivec2 v2Size;
     ivec2 v2Offset;
+    vec2 v2PixelSize;
 
     std::unordered_map<uint8_t, Texture*> mTextureAttachments;
     std::vector<unsigned int> vDrawBuffers;
@@ -64,4 +65,5 @@ public:
     float getAspectRatio();
     float getAspectRatioWidthToHeight();
     vec4 getPixel(ivec2 pos);
+    vec2 getPixelSize() const;
 };

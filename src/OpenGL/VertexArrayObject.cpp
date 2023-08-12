@@ -2,11 +2,14 @@
 #include <GL/glew.h>
 
 
+unsigned int VertexArrayObject::PrimitiveTypes::POINTS         = GL_POINTS;
 unsigned int VertexArrayObject::PrimitiveTypes::TRIANGLES      = GL_TRIANGLES;
 unsigned int VertexArrayObject::PrimitiveTypes::TRIANGLE_STRIP = GL_TRIANGLE_STRIP;
+unsigned int VertexArrayObject::PrimitiveTypes::TRIANGLE_FAN   = GL_TRIANGLE_FAN;
 unsigned int VertexArrayObject::PrimitiveTypes::LINES          = GL_LINES;
 unsigned int VertexArrayObject::PrimitiveTypes::LINE_STRIP     = GL_LINE_STRIP;
 unsigned int VertexArrayObject::PrimitiveTypes::LINE_LOOP      = GL_LINE_LOOP;
+unsigned int VertexArrayObject::PrimitiveTypes::LINE_ADJACENCY = GL_LINES_ADJACENCY;
 unsigned int VertexArrayObject::PrimitiveTypes::QUADS          = GL_QUADS;
 unsigned int VertexArrayObject::PrimitiveTypes::QUAD_STRIP     = GL_QUAD_STRIP;
 

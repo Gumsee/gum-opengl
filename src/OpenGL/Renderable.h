@@ -5,8 +5,8 @@ class Renderable
 {
 
 public:
-    Renderable();
-    ~Renderable();
+    Renderable() {};
+    virtual ~Renderable() {};
 
     virtual void onProjectionUpdate() {};
     virtual void prerender() {};

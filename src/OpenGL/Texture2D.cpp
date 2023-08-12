@@ -115,8 +115,9 @@ void Texture2D::updateImage()
     
 void Texture2D::initEmpty()
 {
-    //vPixelData.resize(v2Size.x * v2Size.y * iChannels);
-    //std::fill(vPixelData.begin(), vPixelData.end(), 255);
+    size_t dataSize = v2Size.x * v2Size.y * iChannels;
+    vPixelData = (unsigned char*)malloc(dataSize);
+    memset(vPixelData, 0, dataSize);
 }
 
 
@@ -160,11 +161,26 @@ void Texture2D::setFiltering(FilteringTypes filteringtype)
 //
 // Setter
 //
-void Texture2D::setSize(const ivec2& size)                              { this->v2Size = size; updateImage(); }
 void Texture2D::setData(unsigned char* data)                            { this->vPixelData = data; }
+void Texture2D::setSize(const ivec2& size)
+{ 
+    /*size_t oldDataSize = v2Size.x * v2Size.y * iChannels;
+    size_t newDataSize = size.x * size.y * iChannels;
+
+    vPixelData = realloc(vPixelData, newDataSize);
+
+    if(oldDataSize < newDataSize) // Add data
+        memset(vPixelData, oldDataSize, newDataSize - oldDataSize);*/
+
+    this->v2Size = size; 
+    updateImage(); 
+}
+
 void Texture2D::setPixel(const int& x, const int& y, const vec4& color) 
 {
-    int pos = v2Size.x * y * iChannels + x * iChannels;
+    unsigned int pos = v2Size.x * y * iChannels + x * iChannels;
+    if(pos >= v2Size.x * v2Size.y * iChannels)
+        return;
     for(unsigned int i = 0; i < iChannels; i++)
         ((unsigned char*)vPixelData)[pos + i] = color[i] * 255;
 }
