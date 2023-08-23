@@ -1,43 +1,17 @@
-#include "ShaderProgram.h"
-#include <iostream>
-#include <vector>
+#include <Graphics/ShaderProgram.h>
 #include <System/Output.h>
-#include <System/MemoryManagement.h>
-#include <fstream>
+#include <GL/glew.h>
 
-ShaderProgram* ShaderProgram::pCurrentlyBoundShaderProgram = nullptr;
 
-//The : _numAttributes(0) ect. is an initialization list. It is a better way to initialize variables, since it avoids an extra copy. 
-ShaderProgram::ShaderProgram()  
+void ShaderProgram::createNative()
 {
-
+	iProgramID = glCreateProgram();
 }
 
-ShaderProgram::~ShaderProgram() 
+void ShaderProgram::destroyNative()
 {
 	if(this->iProgramID != 0)
 		glDeleteProgram(this->iProgramID);
-	
-	for(size_t i = 0; i < vShaders.size(); i++)
-		Gum::_delete(vShaders[i]);
-
-	Locations.clear();
-	vShaders.clear();
-}
-
-//Compiles the shaders into a form that your GPU can understand
-void ShaderProgram::compileShaders() 
-{
-
-	for(size_t i = 0; i < vShaders.size(); i++)
-	{
-        Gum::Output::debug("ShaderProgram: Compiling " + std::to_string(vShaders[i]->getShaderType()));
-        std::string error = vShaders[i]->compile();
-        if(error != "")
-        {
-            Gum::Output::fatal("ShaderProgram: " + this->sName + ": " + error);
-        }
-	}
 }
 
 void ShaderProgram::linkShaders() 
@@ -86,25 +60,10 @@ void ShaderProgram::linkShaders()
 }
 
 //Adds an attribute to our shader. SHould be called between compiling and linking.
-void ShaderProgram::addAttribute(const std::string& attributeName, const int& number) {
+void ShaderProgram::addAttribute(const std::string& attributeName, const int& number) 
+{
 	glBindAttribLocation(this->iProgramID, number, attributeName.c_str());
 	Attributes[attributeName] = number;
-}
-
-void ShaderProgram::addUniform(const std::string& Name) { Locations[Name] = getUniformLocation(Name); }
-void ShaderProgram::addUniform(const std::string& Name, const int& size)
-{
-	for (int i = 0; i < size; i++)
-	{
-		addUniform(Name + "[" + std::to_string(i) + "]");
-	}
-}
-void ShaderProgram::addTexture(const std::string& Name, const int& index)
-{
-    Locations[Name] = getUniformLocation(Name);
-    use();
-    loadUniform(Name, index);
-    unuse();
 }
 
 void ShaderProgram::use()   { glUseProgram(iProgramID); setCurrentlyBoundShader(this); }
@@ -112,42 +71,6 @@ void ShaderProgram::unuse() { glUseProgram(0);          setCurrentlyBoundShader(
 
 
 int ShaderProgram::getUniformLocation(const std::string& UniformName) { return glGetUniformLocation(iProgramID, UniformName.c_str()); }
-void ShaderProgram::addShader(Shader* shader) { this->vShaders.push_back(shader); }
-void ShaderProgram::removeShader(int index) { this->vShaders.erase(vShaders.begin() + index); }
-
-void ShaderProgram::build(const std::string& name, std::map<const char*, unsigned int> attributes)
-{
-	this->sName = name;
-    Gum::Output::debug("ShaderProgram: Creating Shader Program for " + sName);
-	iProgramID = glCreateProgram();
-	compileShaders();
-
-	for (auto attribute : attributes)
-	{
-		addAttribute(attribute.first, attribute.second);
-		Gum::Output::debug("Adding attribute " + std::string(attribute.first) + " (" + std::to_string(attribute.second) + ")");
-	}
-
-	if(attributes.size() > 0)
-	{
-		Gum::Output::debug("");
-	}
-
-    Gum::Output::debug("ShaderProgram: Linking " + name);
-	linkShaders();
-
-
-    Gum::Output::debug("ShaderProgram: Adding default Uniforms " + name);
-	addUniform("transformationMatrix");
-	addUniform("viewMatrix");
-	addUniform("projectionMatrix");
-}
-
-void ShaderProgram::rebuild()
-{
-	//glDeleteProgram(iProgramID);
-    //build();
-}
 
 void ShaderProgram::loadUniform(const std::string& uniformName, const bool& var) 				{ glUniform1i(Locations[uniformName], var); }
 void ShaderProgram::loadUniform(const std::string& uniformName, const vec2& var) 				{ glUniform2f(Locations[uniformName], var.x, var.y); }
@@ -159,19 +82,3 @@ void ShaderProgram::loadUniform(const std::string& uniformName, const mat4& var)
 void ShaderProgram::loadUniform(const std::string& uniformName, const float& var) 				{ glUniform1f(Locations[uniformName], var); }
 void ShaderProgram::loadUniform(const std::string& uniformName, const int& var) 				{ glUniform1i(Locations[uniformName], var); }
 void ShaderProgram::loadUniform(const std::string& uniformName, const std::vector<mat4>& var) 	{ for (size_t i = 0; i < var.size(); i++) { loadUniform(uniformName + "[" + std::to_string(i) + "]", var[i]); } }
-
-
-//
-// Setter
-//
-void ShaderProgram::setName(const std::string& name) 				{ this->sName = name; }
-void ShaderProgram::setCurrentlyBoundShader(ShaderProgram* program) { pCurrentlyBoundShaderProgram = program; }
-
-
-//
-// Getter
-//
-std::string ShaderProgram::getName() const           				{ return sName; }
-GLuint ShaderProgram::getProgramID() const           				{ return iProgramID; }
-ShaderProgram* ShaderProgram::getCurrentlyBoundShader() 			{ return pCurrentlyBoundShaderProgram; }
-Shader* ShaderProgram::getShader(int index) 						{ return this->vShaders[index]; }

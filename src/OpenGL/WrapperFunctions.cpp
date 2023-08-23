@@ -1,9 +1,7 @@
-#include "WrapperFunctions.h"
-//#include <OS/GLContext.h>
+#include <Graphics/WrapperFunctions.h>
 #include <Essentials/Tools.h>
 #include <System/Output.h>
 #include <System/MemoryManagement.h>
-#include <string>
 
 bool gumTexImage2D(const unsigned int& target, const int& level, const int& internalformat, ivec2 size, const int& border, const unsigned int& format, const unsigned int& type, const void* pixels)
 {

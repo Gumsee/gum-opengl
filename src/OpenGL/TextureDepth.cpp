@@ -1,19 +1,10 @@
-#include "TextureDepth.h"
-#include <GL/glew.h>
-#include <iostream>
-#include <future>
-#include "WrapperFunctions.h"
+#include <Graphics/TextureDepth.h>
+#include <Graphics/WrapperFunctions.h>
 #include <System/Output.h>
-#include <System/MemoryManagement.h>
-#include <Codecs/TextureLoader.h>
-#include <Essentials/Tools.h>
-#include <vector>
+#include <GL/glew.h>
 
-TextureDepth::TextureDepth(std::string name, uint16_t datatype)
-    : Texture(TEXTUREDEPTH, datatype)
+void TextureDepth::createNative()
 {
-	this->sName = name;
-    
     bind(0);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -21,11 +12,6 @@ TextureDepth::TextureDepth(std::string name, uint16_t datatype)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     unbind(0);
 }
-
-TextureDepth::~TextureDepth()
-{
-}
-
 
 void TextureDepth::bind(const int& index)
 {
@@ -47,14 +33,3 @@ void TextureDepth::updateImage()
         Gum::Output::error("TextureDepth::updateImage: glTexImage Failed.");
     unbind(0);
 }
-
-//
-// Setter
-//
-void TextureDepth::setSize(const ivec2& size) { this->v2Size = size; updateImage(); }
-
-
-//
-// Getter
-//
-ivec2 TextureDepth::getSize() const			  { return this->v2Size; }

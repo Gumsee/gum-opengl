@@ -1,33 +1,16 @@
-#include "ElementBufferObject.h"
+#include <Graphics/ElementBufferObject.h>
+#include <GL/glew.h>
 
-ElementBufferObject::ElementBufferObject()
-{
-    glGenBuffers(1, &ieboID);
-}
+void ElementBufferObject::createNative()    { glGenBuffers(1, &ieboID); }
+void ElementBufferObject::destroyNative()   { glDeleteBuffers(1, &ieboID); }
+void ElementBufferObject::bind()            { glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ieboID); }
+void ElementBufferObject::unbind()          { glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); }
 
-ElementBufferObject::~ElementBufferObject() 
-{
-    glDeleteBuffers(1, &ieboID);
-}
-
-void ElementBufferObject::bind()
-{
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ieboID); 
-}
-
-void ElementBufferObject::unbind()
-{
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-}
-
-void ElementBufferObject::setData(const std::vector<unsigned int>& indices, const unsigned int& usage)
+void ElementBufferObject::setData(const std::vector<unsigned int>& indices)
 {
     bind();
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(indices[0]), &indices[0], usage);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(indices[0]), &indices[0], GL_STATIC_DRAW);
     unbind();
     
     iLength = indices.size();
 }
-
-unsigned int ElementBufferObject::getID() const     { return this->ieboID; }
-unsigned int ElementBufferObject::getLength() const { return this->iLength; }

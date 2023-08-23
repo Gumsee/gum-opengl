@@ -1,48 +1,25 @@
+#include <Graphics/Framebuffer.h>
+#include <Graphics/WrapperFunctions.h>
 #include <GL/glew.h>
 #include <System/Output.h>
-#include <System/MemoryManagement.h>
-
 #include <Essentials/Tools.h>
-#include "Framebuffer.h"
-#include "TextureDepth.h"
-#include "TextureHDR.h"
-#include "WrapperFunctions.h"
-#include <algorithm>
+#include <Graphics/TextureDepth.h>
+#include <Graphics/TextureHDR.h>
 
 
-Framebuffer::Framebuffer(const ivec2& size, bool iswindow)
+void Framebuffer::createNative()
 {
-    this->v2Offset = ivec2(0,0);
-    this->v2Size = size;
-    this->iID = 0;
-    this->iDepthBufferID = 0;
-    this->pDepthTexture = nullptr;
-
-    if(!iswindow)
-    {
-        glGenFramebuffers(1, &this->iID);
-        //bind();
-        //glClearColor(clearcolor.x, clearcolor.y, clearcolor.z, clearcolor.w);
-        //glDrawBuffer(GL_NONE);
-        //glDrawBuffer(GL_COLOR_ATTACHMENT0);
-    }
-    else if(WindowFramebuffer == nullptr)
-    {
-        WindowFramebuffer = this;
-    }
-
-    if(CurrentlyBoundFramebuffer == nullptr)
-        CurrentlyBoundFramebuffer = this;
-    updateMatrix();
+    glGenFramebuffers(1, &this->iID);
+    //bind();
+    //glClearColor(clearcolor.x, clearcolor.y, clearcolor.z, clearcolor.w);
+    //glDrawBuffer(GL_NONE);
+    //glDrawBuffer(GL_COLOR_ATTACHMENT0);
 }
 
-Framebuffer::~Framebuffer() 
+void Framebuffer::destroyNative()
 {
-	glDeleteFramebuffers(1, &this->iID);
-    for(auto entry : mTextureAttachments)
-        Gum::_delete(entry.second);
-
-    Gum::_delete(pDepthTexture);
+    if(this->iID != 0)
+	    glDeleteFramebuffers(1, &this->iID);
 }
 
 void Framebuffer::bind()
@@ -69,7 +46,7 @@ void Framebuffer::unbind(const ivec2& viewportsize)
 }
 
 
-Texture2D* Framebuffer::addTextureAttachment(unsigned int index, std::string name, int type, int internalType, int datatype)
+Texture2D* Framebuffer::addTextureAttachment(unsigned int index, std::string name, int datatype)
 {
     if(std::find(vDrawBuffers.begin(), vDrawBuffers.end(), index) != vDrawBuffers.end())
     {
@@ -98,7 +75,7 @@ Texture2D* Framebuffer::addTextureAttachment(unsigned int index, std::string nam
     return texture;
 }
 
-TextureCube* Framebuffer::addCubeTextureAttachment(unsigned int index, std::string name, int type, int internalType, int datatype)
+TextureCube* Framebuffer::addCubeTextureAttachment(unsigned int index, std::string name, uint16_t format, uint16_t internalFormat, int datatype)
 {
     if(std::find(vDrawBuffers.begin(), vDrawBuffers.end(), index) != vDrawBuffers.end())
     {
@@ -117,7 +94,7 @@ TextureCube* Framebuffer::addCubeTextureAttachment(unsigned int index, std::stri
     texture->bind();
     for (unsigned int i = 0; i < 6; ++i)
 	{
-		if(!gumTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internalType, this->v2Size, 0, type, datatype, (void*)nullptr))
+		if(!gumTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internalFormat, this->v2Size, 0, format, datatype, (void*)nullptr))
             Gum::Output::error("Framebuffer::addCubeTextureAttachment: glTexImage Failed.");
         //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, texture->getID(), 0);
         drawAttachmentTexture(0, index, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i);
@@ -253,14 +230,6 @@ void Framebuffer::checkStatus()
     }
 }
 
-void Framebuffer::updateMatrix()
-{
-    v2PixelSize = vec2(1.0f) / (vec2)v2Size;
-    fAspectRatio = (float)v2Size.y / (float)v2Size.x;
-    fAspectRatioWidthToHeight = (float)v2Size.x / (float)v2Size.y;
-    m4ScreenMatrix = Gum::Maths::ortho((float)v2Size.y, (float)v2Size.x, 0.0f, 0.0f, -100.0f, 100.0f);
-}
-
 void Framebuffer::resetViewport()
 {
     glViewport(this->v2Offset.x, this->v2Offset.y, this->v2Size.x, this->v2Size.y);
@@ -321,23 +290,6 @@ void Framebuffer::setDepthTextureAttachment(TextureDepth* depthMap)
     currFramebuffer->bind();
 }
 
-void Framebuffer::setOffset(ivec2 offset)               { this->v2Offset = offset; }
-void Framebuffer::setSize(ivec2 size)                   { this->v2Size = size; updateMatrix(); resizeTextures(); }
-
-
-//
-// Getter
-//
-Texture* Framebuffer::getTextureAttachment(int index)   { return this->mTextureAttachments[index]; }
-TextureDepth* Framebuffer::getDepthTextureAttachment()  { return this->pDepthTexture; }
-int Framebuffer::getDepthAttachmentID()                 { return this->iDepthBufferID; }
-int Framebuffer::numTextureAttachments()                { return this->mTextureAttachments.size(); }
-ivec2 Framebuffer::getSize()                            { return this->v2Size; }
-ivec2 Framebuffer::getOffset()                          { return this->v2Offset; }
-unsigned int Framebuffer::getID()                       { return this->iID; }
-mat4 Framebuffer::getScreenMatrix()                     { return this->m4ScreenMatrix; }
-float Framebuffer::getAspectRatio()        	            { return this->fAspectRatio; }
-float Framebuffer::getAspectRatioWidthToHeight()        { return this->fAspectRatioWidthToHeight; }
 vec4 Framebuffer::getPixel(ivec2 pos)
 {
     vec4 pixelcolor;
@@ -355,4 +307,3 @@ vec4 Framebuffer::getPixel(ivec2 pos)
 
     return pixelcolor / 255.0f;
 }
-vec2 Framebuffer::getPixelSize() const          		  { return this->v2PixelSize; }

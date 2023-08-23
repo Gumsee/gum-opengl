@@ -1,33 +1,7 @@
-#include "TextureCube.h"
-#include <GL/glew.h>
+#include <Graphics/TextureCube.h>
+#include <Graphics/WrapperFunctions.h>
 #include <System/Output.h>
-#include <System/MemoryManagement.h>
-#include <future>
-#include "WrapperFunctions.h"
-#include <Codecs/TextureLoader.h>
-
-TextureCube::TextureCube(std::string name, uint16_t datatype)
-    : Texture(TEXTURECUBE, datatype)
-{
-	this->sName = name;
-	for(int i = 0; i < 0; i++)
-	{
-		bNeedsFreeing[i] = false;
-    	vPixelData[i] = nullptr;
-		iChannels[i] = 0;
-	}
-    clampToEdge();
-    setFiltering(LINEAR);
-}
-
-TextureCube::~TextureCube()
-{
-	for(int i = 0; i < 0; i++)
-	{
-		if(bNeedsFreeing[i] && vPixelData[i] != nullptr)
-			free(vPixelData[i]);
-	}
-}
+#include <GL/glew.h>
 
 void TextureCube::bind(const int& index)
 {
@@ -39,13 +13,6 @@ void TextureCube::unbind(const int& index)
 {
 	glActiveTexture(GL_TEXTURE0 + index);
     glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-}
-
-	
-void TextureCube::updateImage()
-{
-	for(int i = 0; i < 6; i++)
-        updateImage(i);
 }
 
 void TextureCube::updateImage(int side)
@@ -65,34 +32,6 @@ void TextureCube::updateImage(int side)
     if(bIsMipmapped)
         glGenerateMipmap(GL_TEXTURE_CUBE_MAP_POSITIVE_X + side);
     unbind(0);
-}
-
-void TextureCube::load(std::vector<std::string> texturepaths, bool wait)
-{
-	if(texturepaths.size() != 6)
-	{
-		Gum::Output::error("TextureCube.load: Wrong amount of textures specified.");
-		return;
-	}
-
-    auto future = std::async(std::launch::async, [texturepaths, wait, this] {
-		for(size_t i = 0; i < texturepaths.size(); i++)
-		{
-			ImageData imageData = TextureLoader::loadImage(texturepaths[i]);
-			v2Size[i] = ivec2(imageData.width, imageData.height);
-			iChannels[i] = imageData.numComps;
-			vPixelData[i] = imageData.data;
-			bNeedsFreeing[i] = true;
-		}
-
-        vToLoadTextures.push_back(this);
-        markLoaded();
-    });
-
-
-
-    if(wait)
-        future.wait();
 }
 
 
@@ -131,29 +70,4 @@ void TextureCube::setFiltering(FilteringTypes filteringtype)
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, filtering);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, filtering);
     unbind();
-}
-
-
-
-//
-// Setter
-//
-void TextureCube::setData(unsigned char* data, const unsigned int& side)
-{
-	vPixelData[side] = data;
-}
-
-void TextureCube::setSize(ivec2 size, int side)
-{
-    v2Size[side] = size;
-    updateImage(side);
-}
-
-void TextureCube::setSize(ivec2 size)
-{
-    for(int i = 0; i < 6; i++)
-    {
-        v2Size[i] = size;
-        updateImage(i);
-    }
 }

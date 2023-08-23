@@ -1,25 +1,23 @@
-#include "Shader.h"
+#include <Graphics/Shader.h>
+#include <GL/glew.h>
 
-Shader::Shader(std::string sourcecode, int shadertype)
+const unsigned int Shader::TYPES::VERTEX_SHADER                  = GL_VERTEX_SHADER;
+const unsigned int Shader::TYPES::FRAGMENT_SHADER                = GL_FRAGMENT_SHADER;
+const unsigned int Shader::TYPES::TESSELLATION_CONTROL_SHADER    = GL_TESS_CONTROL_SHADER;
+const unsigned int Shader::TYPES::TESSELLATION_EVALUATION_SHADER = GL_TESS_EVALUATION_SHADER;
+const unsigned int Shader::TYPES::GEOMETRY_SHADER                = GL_GEOMETRY_SHADER;
+
+void Shader::createNative()
 {
-    this->sSource = sourcecode;
-    this->iType = shadertype;
-    switch(this->iType)
-    {
-        case TYPES::VERTEX_SHADER:                  this->sTypeName = "Vertex Shader"; break;
-        case TYPES::FRAGMENT_SHADER:                this->sTypeName = "Fragment Shader"; break;
-        case TYPES::TESSELLATION_CONTROL_SHADER:    this->sTypeName = "Tessellation Control Shader"; break;
-        case TYPES::TESSELLATION_EVALUATION_SHADER: this->sTypeName = "Tessellation Evaluation Shader"; break;
-        case TYPES::GEOMETRY_SHADER:                this->sTypeName = "Geometry Shader"; break;
-    }
     this->iShaderID = glCreateShader(this->iType);
 }
 
-Shader::~Shader()
+void Shader::destroyNative()
 {
     if(iShaderID != 0)
         glDeleteShader(iShaderID);
 }
+
 
 std::string Shader::compile()
 {
@@ -50,8 +48,3 @@ std::string Shader::compile()
     bIsCompiled = true;
     return "";
 }
-
-//Getter
-std::string Shader::getSourceCode() { return this->sSource; }
-int Shader::getShaderType()         { return this->iType; }
-int Shader::getShaderID()           { return this->iShaderID; }

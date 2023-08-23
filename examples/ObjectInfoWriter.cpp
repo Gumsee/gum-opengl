@@ -1,6 +1,6 @@
 #include <System/MemoryManagement.h>
 #include <Essentials/ArgumentParser.h>
-#include <OpenGL/Object3D.h>
+#include <Graphics/Object3D.h>
 #include <Codecs/Scene3DLoader.h>
 #include <gum-maths.h>
 
