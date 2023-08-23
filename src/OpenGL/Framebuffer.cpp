@@ -46,7 +46,7 @@ void Framebuffer::unbind(const ivec2& viewportsize)
 }
 
 
-Texture2D* Framebuffer::addTextureAttachment(unsigned int index, std::string name, int datatype)
+Texture2D* Framebuffer::addTextureAttachment(unsigned int index, std::string name, uint16_t datatype, uint16_t numChannels)
 {
     if(std::find(vDrawBuffers.begin(), vDrawBuffers.end(), index) != vDrawBuffers.end())
     {
@@ -55,6 +55,7 @@ Texture2D* Framebuffer::addTextureAttachment(unsigned int index, std::string nam
     }
 
     Texture2D* texture = new Texture2D(name, datatype);
+    texture->setNumChannels(numChannels);
     texture->setSize(v2Size);
     texture->clampToEdge();
     texture->setFiltering(Texture::NEAREST_NEIGHBOR);

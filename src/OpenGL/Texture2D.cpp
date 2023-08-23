@@ -21,7 +21,8 @@ void Texture2D::updateImage()
     int pixelformat = GL_RGBA;
     int pixelinternalformat = GL_RGBA;
     bool isFloat = iDatatype == Datatypes::FLOAT;
-    switch(iChannels) {
+    switch(iChannels) 
+    {
         case 1:  pixelformat = GL_RED;  pixelinternalformat = isFloat ? GL_R32F    : GL_RED;  break;
         case 2:  pixelformat = GL_RG;   pixelinternalformat = isFloat ? GL_RG32F   : GL_RG;   break;
         case 3:  pixelformat = GL_RGB;  pixelinternalformat = isFloat ? GL_RGB32F  : GL_RGB;  break;
