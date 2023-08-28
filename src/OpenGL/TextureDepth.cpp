@@ -29,7 +29,7 @@ void TextureDepth::updateImage()
 {
     bind(0);
     gumPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    if(!gumTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, this->v2Size, 0, GL_DEPTH_COMPONENT, iDatatype, 0))
+    if(!gumTexImage2D(GL_TEXTURE_2D, iCurrentMipmapLevel, GL_DEPTH_COMPONENT24, this->v2Size, 0, GL_DEPTH_COMPONENT, iDatatype, 0))
         Gum::Output::error("TextureDepth::updateImage: glTexImage Failed.");
     unbind(0);
 }

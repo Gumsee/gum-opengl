@@ -6,6 +6,18 @@
 #include <Graphics/TextureDepth.h>
 #include <Graphics/TextureHDR.h>
 
+const unsigned short Framebuffer::ClearFlags::COLOR   = GL_COLOR_BUFFER_BIT;
+const unsigned short Framebuffer::ClearFlags::DEPTH   = GL_DEPTH_BUFFER_BIT;
+const unsigned short Framebuffer::ClearFlags::STENCIL = GL_STENCIL_BUFFER_BIT;
+
+
+const unsigned short Framebuffer::TextureTargets::TEXTURE2D          = GL_TEXTURE_2D;
+const unsigned short Framebuffer::TextureTargets::CUBEMAP_POSITIVE_X = GL_TEXTURE_CUBE_MAP_POSITIVE_X;
+const unsigned short Framebuffer::TextureTargets::CUBEMAP_NEGATIVE_X = GL_TEXTURE_CUBE_MAP_NEGATIVE_X;
+const unsigned short Framebuffer::TextureTargets::CUBEMAP_POSITIVE_Y = GL_TEXTURE_CUBE_MAP_POSITIVE_Y;
+const unsigned short Framebuffer::TextureTargets::CUBEMAP_NEGATIVE_Y = GL_TEXTURE_CUBE_MAP_NEGATIVE_Y;
+const unsigned short Framebuffer::TextureTargets::CUBEMAP_POSITIVE_Z = GL_TEXTURE_CUBE_MAP_POSITIVE_Z;
+const unsigned short Framebuffer::TextureTargets::CUBEMAP_NEGATIVE_Z = GL_TEXTURE_CUBE_MAP_NEGATIVE_Z;
 
 void Framebuffer::createNative()
 {
@@ -43,6 +55,13 @@ void Framebuffer::unbind(const ivec2& viewportsize)
         if(viewportsize != ivec2(0,0))
             glViewport(0, 0, viewportsize.x, viewportsize.y);
     }
+}
+
+void Framebuffer::clear(const unsigned short& flags)
+{
+    vec4 glcolor = cClearColor.getGLColor();
+    glClearColor(glcolor.r, glcolor.g, glcolor.b, glcolor.a);
+    glClear(flags);
 }
 
 
@@ -95,11 +114,40 @@ TextureCube* Framebuffer::addCubeTextureAttachment(unsigned int index, std::stri
     texture->bind();
     for (unsigned int i = 0; i < 6; ++i)
 	{
-		if(!gumTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internalFormat, this->v2Size, 0, format, datatype, (void*)nullptr))
+		if(!gumTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internalFormat, this->v2Size, 0, format, datatype, 0))
             Gum::Output::error("Framebuffer::addCubeTextureAttachment: glTexImage Failed.");
         //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, texture->getID(), 0);
-        drawAttachmentTexture(0, index, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i);
+        attachTexture(index, texture, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i);
 	}
+    texture->unbind();
+
+    //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, GL_TEXTURE_CUBE_MAP_POSITIVE_X, texture->getID(), 0);
+    vDrawBuffers.push_back(GL_COLOR_ATTACHMENT0 + index);
+	glDrawBuffers(vDrawBuffers.size(), &vDrawBuffers[0]);
+        
+    #ifdef CHECK_GL_ERRORS
+    checkStatus();
+    #endif
+    currFramebuffer->bind();
+
+    return texture;
+}
+
+TextureCube* Framebuffer::addCubeTextureAttachment(unsigned int index, TextureCube* texture)
+{
+   if(std::find(vDrawBuffers.begin(), vDrawBuffers.end(), index) != vDrawBuffers.end())
+    {
+        Gum::Output::error("Framebuffer: Texture has already been attached to index " + std::to_string(index));
+        return nullptr;
+    }
+    
+    mTextureAttachments[index] = texture;
+
+    Framebuffer* currFramebuffer = CurrentlyBoundFramebuffer;
+    bind();
+    texture->bind();
+    for (unsigned int i = 0; i < 6; ++i)
+        attachTexture(index, texture, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i);
     texture->unbind();
 
     //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, GL_TEXTURE_CUBE_MAP_POSITIVE_X, texture->getID(), 0);
@@ -129,7 +177,7 @@ TextureDepth* Framebuffer::addDepthTextureAttachment(std::string name)
 
     Framebuffer* currFramebuffer = CurrentlyBoundFramebuffer;
     bind();
-    pDepthTexture = new TextureDepth(name, Texture::Datatypes::FLOAT);
+    pDepthTexture = new TextureDepth(name, Gum::Graphics::Datatypes::FLOAT);
     pDepthTexture->bind();
     pDepthTexture->setSize(v2Size);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, this->pDepthTexture->getID(), 0);
@@ -197,11 +245,11 @@ void Framebuffer::addDepthAttachment()
     currFramebuffer->bind();
 }
 
-void Framebuffer::drawAttachmentTexture(const int& textureattachmentindex, const int& colorattachmentindex, const int& target)
+void Framebuffer::attachTexture(const int& index, Texture* texture, const unsigned short& target, const unsigned int& mipmaplevel)
 {
     Framebuffer* currFramebuffer = CurrentlyBoundFramebuffer;
     bind();
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + colorattachmentindex, target, getTextureAttachment(textureattachmentindex)->getID(), 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, target, texture->getID(), mipmaplevel);
     #ifdef CHECK_GL_ERRORS
     checkStatus();
     #endif
@@ -291,9 +339,9 @@ void Framebuffer::setDepthTextureAttachment(TextureDepth* depthMap)
     currFramebuffer->bind();
 }
 
-vec4 Framebuffer::getPixel(ivec2 pos)
+color Framebuffer::getPixel(ivec2 pos)
 {
-    vec4 pixelcolor;
+    color pixelcolor;
     Framebuffer* currFramebuffer = CurrentlyBoundFramebuffer;
     bind();
 	unsigned char data[4];
@@ -306,5 +354,5 @@ vec4 Framebuffer::getPixel(ivec2 pos)
 
     currFramebuffer->bind();
 
-    return pixelcolor / 255.0f;
+    return pixelcolor;
 }

@@ -2,6 +2,7 @@
 #include <Essentials/Tools.h>
 #include <System/Output.h>
 #include <System/MemoryManagement.h>
+#include <GL/glew.h>
 
 bool gumTexImage2D(const unsigned int& target, const int& level, const int& internalformat, ivec2 size, const int& border, const unsigned int& format, const unsigned int& type, const void* pixels)
 {
@@ -47,7 +48,7 @@ bool gumTexImage2D(const unsigned int& target, const int& level, const int& inte
     return true;
 }
 
-bool gumPixelStorei(const GLenum& pname, const GLint& param)
+bool gumPixelStorei(const unsigned int& pname, const int& param)
 {
     #ifdef CHECK_GL_ERRORS
         while(glGetError() != GL_NO_ERROR) { } //Empty errors
@@ -64,7 +65,7 @@ bool gumPixelStorei(const GLenum& pname, const GLint& param)
     return true;
 }
 
-bool gumGenTextures(const GLsizei& n, GLuint* textures)
+bool gumGenTextures(const int& n, unsigned int* textures)
 {
     #ifdef CHECK_GL_ERRORS
         while(glGetError() != GL_NO_ERROR) { } //Empty errors

@@ -11,6 +11,11 @@ void TextureCube::bind(const int& index)
 
 void TextureCube::unbind(const int& index)
 {
+    TextureCube::unbindGlobal(index);
+}
+
+void TextureCube::unbindGlobal(const int& index)
+{
 	glActiveTexture(GL_TEXTURE0 + index);
     glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 }
@@ -27,10 +32,10 @@ void TextureCube::updateImage(int side)
         case 4:  pixelformat = GL_RGBA; break;
     }
 
-    if(!gumTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + side, 0, pixelformat, v2Size[side], 0, pixelformat, iDatatype, vPixelData[side]))
+    if(!gumTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + side, iCurrentMipmapLevel, pixelformat, v2Size[side], 0, pixelformat, iDatatype, vPixelData[side]))
         Gum::Output::error("TextureCube::updateImage: glTexImage Failed.");
-    if(bIsMipmapped)
-        glGenerateMipmap(GL_TEXTURE_CUBE_MAP_POSITIVE_X + side);
+    if(side == 0 && bIsMipmapped)
+        glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
     unbind(0);
 }
 

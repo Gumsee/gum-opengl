@@ -10,59 +10,48 @@ add_library(${CMAKE_PROJECT_NAME}_trgt STATIC ${SRC})
 include_directories(${CMAKE_SOURCE_DIR}/external/)
 
  
-        if(OPENGL_FOUND)
+    if(OPENGL_FOUND)
             include_directories(${OPENGL_INCLUDE_DIRS})
         else()
             message(FATAL_ERROR Library for OPENGL cannot not found)
         endif() 
-        if(GUMGRAPHICS_FOUND)
+    if(GUMGRAPHICS_FOUND)
             include_directories(${GUMGRAPHICS_INCLUDE_DIRS})
         else()
             message(FATAL_ERROR Library for GUMGRAPHICS cannot not found)
         endif() 
-        if(GUMCODECS_FOUND)
+    if(GUMCODECS_FOUND)
             include_directories(${GUMCODECS_INCLUDE_DIRS})
         else()
             message(FATAL_ERROR Library for GUMCODECS cannot not found)
         endif() 
-        if(GUMPRIMITIVES_FOUND)
+    if(GUMPRIMITIVES_FOUND)
             include_directories(${GUMPRIMITIVES_INCLUDE_DIRS})
         else()
             message(FATAL_ERROR Library for GUMPRIMITIVES cannot not found)
         endif() 
-        if(GUMESSENTIALS_FOUND)
+    if(GUMESSENTIALS_FOUND)
             include_directories(${GUMESSENTIALS_INCLUDE_DIRS})
         else()
             message(FATAL_ERROR Library for GUMESSENTIALS cannot not found)
         endif() 
-        if(GUMDESKTOP_FOUND)
+    if(GUMDESKTOP_FOUND)
             include_directories(${GUMDESKTOP_INCLUDE_DIRS})
         else()
             message(FATAL_ERROR Library for GUMDESKTOP cannot not found)
         endif() 
-        if(GUMSYSTEM_FOUND)
+    if(GUMSYSTEM_FOUND)
             include_directories(${GUMSYSTEM_INCLUDE_DIRS})
         else()
             message(FATAL_ERROR Library for GUMSYSTEM cannot not found)
         endif() 
-        if(GUMMATHS_FOUND)
+    if(GUMMATHS_FOUND)
             include_directories(${GUMMATHS_INCLUDE_DIRS})
         else()
             message(FATAL_ERROR Library for GUMMATHS cannot not found)
         endif()
 
- 
 
-install(
-    FILES gum-opengl.h
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${CMAKE_PROJECT_NAME}/
-) 
-
-file(GLOB HEADERS Graphics/*.h)
-install(
-    FILES ${HEADERS}
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${CMAKE_PROJECT_NAME}/Graphics/
-)
 
 
 

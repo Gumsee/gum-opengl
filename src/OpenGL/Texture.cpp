@@ -2,11 +2,6 @@
 #include <Graphics/WrapperFunctions.h>
 #include <GL/glew.h>
 
-
-const uint16_t Texture::Datatypes::UNSIGNED_CHAR = GL_UNSIGNED_BYTE;
-const uint16_t Texture::Datatypes::FLOAT         = GL_FLOAT;
-const uint16_t Texture::Datatypes::INTEGER       = GL_INT;
-
 const uint16_t Texture::Pixelformat::RGBA        = GL_RGBA;
 const uint16_t Texture::Pixelformat::RGB         = GL_RGB;
 const uint16_t Texture::Pixelformat::RG          = GL_RG;
