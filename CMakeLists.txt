@@ -28,6 +28,12 @@ elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     set(GUM_OS_MACOS true)
     set(GUM_OS_UNIX true)
 
+elseif(${CMAKE_SYSTEM_NAME} MATCHES "Android")
+    add_definitions(-DGUM_OS_ANDROID)
+    add_definitions(-DGUM_OS_UNIX)
+    set(GUM_OS_ANDROID true)
+    set(GUM_OS_UNIX true)
+
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD")
     add_definitions(-DGUM_OS_BSD)
     add_definitions(-DGUM_OS_UNIX)
@@ -52,17 +58,41 @@ endif()
 set(CMAKE_INSTALL_FULL_INCLUDEDIR ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR})
 set(CMAKE_INSTALL_FULL_LIBDIR ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR})
 
-message(STATUS "${CMAKE_PROJECT_NAME}: CXXFLAGS: ${CMAKE_CXX_FLAGS}")
+message(STATUS "${PROJECT_NAME}: CXXFLAGS: ${CMAKE_CXX_FLAGS}")
 
  
-    find_package(OpenGL REQUIRED) 
-    find_package(GumGraphics REQUIRED) 
-    find_package(GumCodecs REQUIRED) 
-    find_package(GumPrimitives REQUIRED) 
-    find_package(GumEssentials REQUIRED) 
-    find_package(GumDesktop REQUIRED) 
-    find_package(GumSystem REQUIRED) 
-    find_package(GumMaths REQUIRED)
+    
+        if(NOT OPENGL_FOUND) 
+            find_package(OpenGL REQUIRED)
+        endif() 
+    
+        if(NOT GUMGRAPHICS_FOUND) 
+            find_package(GumGraphics REQUIRED)
+        endif() 
+    
+        if(NOT GUMCODECS_FOUND) 
+            find_package(GumCodecs REQUIRED)
+        endif() 
+    
+        if(NOT GUMPRIMITIVES_FOUND) 
+            find_package(GumPrimitives REQUIRED)
+        endif() 
+    
+        if(NOT GUMESSENTIALS_FOUND) 
+            find_package(GumEssentials REQUIRED)
+        endif() 
+    
+        if(NOT GUMDESKTOP_FOUND) 
+            find_package(GumDesktop REQUIRED)
+        endif() 
+    
+        if(NOT GUMSYSTEM_FOUND) 
+            find_package(GumSystem REQUIRED)
+        endif() 
+    
+        if(NOT GUMMATHS_FOUND) 
+            find_package(GumMaths REQUIRED)
+        endif()
 
 #add_definitions(-DDEBUG)
 add_definitions(-DCHECK_GL_ERRORS)
