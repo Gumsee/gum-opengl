@@ -282,7 +282,7 @@ void Framebuffer::checkStatus()
 void Framebuffer::resetViewport()
 {
     glViewport(this->v2Offset.x, this->v2Offset.y, this->v2Size.x, this->v2Size.y);
-    glScissor(0.0f, 0.0f, getSize().x, getSize().y);
+    setRenderArea(bbox2i(ivec2(0.0f, 0.0f), getSize()));
 }
 
 void Framebuffer::resizeTextures()
