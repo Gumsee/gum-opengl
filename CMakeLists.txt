@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.0)
+cmake_minimum_required (VERSION 3.0...3.9)
 project(GumOpenGL)
 cmake_policy(SET CMP0072 NEW)
 cmake_policy(SET CMP0090 NEW)

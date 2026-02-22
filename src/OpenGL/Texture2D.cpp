@@ -3,30 +3,37 @@
 #include <System/Output.h>
 #include <GL/glew.h>
 
-void Texture2D::bind(const int& index)
+template<typename T>
+void tTexture2D<T>::bind(const int& index)
 {
 	glActiveTexture(GL_TEXTURE0 + index);
     glBindTexture(GL_TEXTURE_2D, iTextureID);
 }
 
-void Texture2D::unbind(const int& index)
+template<typename T>
+void tTexture2D<T>::unbind(const int& index)
 {
-    Texture2D::unbindGlobal(index);
+    tTexture2D::unbindGlobal(index);
 }
 
-void Texture2D::unbindGlobal(const int& index)
+template<typename T>
+void tTexture2D<T>::unbindGlobal(const int& index)
 {
 	glActiveTexture(GL_TEXTURE0 + index);
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void Texture2D::updateImage()
+template<typename T>
+void tTexture2D<T>::updateImage()
 {
+    if(Gum::Graphics::RUN_HEADLESS)
+        return;
+
     bind(0);
     int pixelformat = GL_RGBA;
     int pixelinternalformat = GL_RGBA;
-    bool isFloat = iDatatype == Gum::Graphics::Datatypes::FLOAT;
-    switch(iChannels) 
+    bool isFloat = this->getDatatype() == Gum::Graphics::Datatypes::FLOAT;
+    switch(this->numChannels()) 
     {
         case 1:  pixelformat = GL_RED;  pixelinternalformat = isFloat ? GL_R32F    : GL_RED;  break;
         case 2:  pixelformat = GL_RG;   pixelinternalformat = isFloat ? GL_RG32F   : GL_RG;   break;
@@ -35,16 +42,20 @@ void Texture2D::updateImage()
     }
     gumPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-    if(!gumTexImage2D(GL_TEXTURE_2D, iCurrentMipmapLevel, pixelinternalformat, v2Size, 0, pixelformat, iDatatype, vPixelData))
-        Gum::Output::error("Texture2D::updateImage: glTexImage Failed.");
+    if(!gumTexImage2D(GL_TEXTURE_2D, iCurrentMipmapLevel, pixelinternalformat, v2Size, 0, pixelformat, this->getDatatype(), this->getDataPtr(0)))
+        Gum::Output::error("tTexture2D::updateImage: glTexImage Failed.");
     if(bIsMipmapped)
         glGenerateMipmap(GL_TEXTURE_2D);
     unbind(0);
 }
 
 
-void Texture2D::repeat(bool mirrored)
+template<typename T>
+void tTexture2D<T>::repeat(bool mirrored)
 {
+    if(Gum::Graphics::RUN_HEADLESS)
+        return;
+
     bind();
     int repeattype = mirrored ? GL_MIRRORED_REPEAT : GL_REPEAT;
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, repeattype);
@@ -52,8 +63,12 @@ void Texture2D::repeat(bool mirrored)
     unbind();
 }
 
-void Texture2D::clampToEdge(bool border)
+template<typename T>
+void tTexture2D<T>::clampToEdge(bool border)
 {
+    if(Gum::Graphics::RUN_HEADLESS)
+        return;
+
     bind();
     int clamptype = border ? GL_CLAMP_TO_BORDER : GL_CLAMP_TO_EDGE;
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, clamptype);
@@ -61,8 +76,12 @@ void Texture2D::clampToEdge(bool border)
     unbind();
 }
 
-void Texture2D::setFiltering(FilteringTypes filteringtype) 
+template<typename T>
+void tTexture2D<T>::setFiltering(FilteringType filteringtype) 
 {
+    if(Gum::Graphics::RUN_HEADLESS)
+        return;
+    
     bind();
     int filtering = 0;
     switch(filteringtype)

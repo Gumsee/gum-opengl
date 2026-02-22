@@ -3,8 +3,8 @@
 #include <GL/glew.h>
 #include <System/Output.h>
 #include <Essentials/Tools.h>
-#include <Graphics/TextureDepth.h>
 #include <Graphics/TextureHDR.h>
+#include <string>
 
 const unsigned short Framebuffer::ClearFlags::COLOR   = GL_COLOR_BUFFER_BIT;
 const unsigned short Framebuffer::ClearFlags::DEPTH   = GL_DEPTH_BUFFER_BIT;
@@ -64,8 +64,9 @@ void Framebuffer::clear(const unsigned short& flags)
     glClear(flags);
 }
 
-
-Texture2D* Framebuffer::addTextureAttachment(unsigned int index, std::string name, uint16_t datatype, uint16_t numChannels)
+template tTexture2D<unsigned char>* Framebuffer::addTextureAttachment(unsigned int, std::string, uint16_t);
+template tTexture2D<float>* Framebuffer::addTextureAttachment(unsigned int, std::string, uint16_t);
+template<typename T> tTexture2D<T>* Framebuffer::addTextureAttachment(unsigned int index, std::string name, uint16_t numChannels)
 {
     if(std::find(vDrawBuffers.begin(), vDrawBuffers.end(), index) != vDrawBuffers.end())
     {
@@ -73,8 +74,8 @@ Texture2D* Framebuffer::addTextureAttachment(unsigned int index, std::string nam
         return nullptr;
     }
 
-    Texture2D* texture = new Texture2D(name, datatype);
-    texture->setNumChannels(numChannels);
+    tTexture2D<T>* texture = new tTexture2D<T>(name);
+    texture->setNumChannels(numChannels, 0);
     texture->setSize(v2Size);
     texture->clampToEdge();
     texture->setFiltering(Texture::NEAREST_NEIGHBOR);
@@ -89,13 +90,15 @@ Texture2D* Framebuffer::addTextureAttachment(unsigned int index, std::string nam
     texture->unbind();
     
     #ifdef CHECK_GL_ERRORS
-    checkStatus();
+    checkStatus("addTextureAttachment");
     #endif
     currFramebuffer->bind();
     return texture;
 }
 
-TextureCube* Framebuffer::addCubeTextureAttachment(unsigned int index, std::string name, uint16_t format, uint16_t internalFormat, int datatype)
+template tTextureCube<unsigned char>* Framebuffer::addCubeTextureAttachment(unsigned int, std::string, uint16_t, uint16_t);
+template tTextureCube<float>* Framebuffer::addCubeTextureAttachment(unsigned int, std::string, uint16_t, uint16_t);
+template<typename T> tTextureCube<T>* Framebuffer::addCubeTextureAttachment(unsigned int index, std::string name, uint16_t format, uint16_t internalFormat)
 {
     if(std::find(vDrawBuffers.begin(), vDrawBuffers.end(), index) != vDrawBuffers.end())
     {
@@ -103,7 +106,7 @@ TextureCube* Framebuffer::addCubeTextureAttachment(unsigned int index, std::stri
         return nullptr;
     }
 
-    TextureCube* texture = new TextureCube(name);
+    tTextureCube<T>* texture = new tTextureCube<T>(name);
     texture->clampToEdge();
     texture->setFiltering(Texture::LINEAR);
     mTextureAttachments[index] = texture;
@@ -114,7 +117,7 @@ TextureCube* Framebuffer::addCubeTextureAttachment(unsigned int index, std::stri
     texture->bind();
     for (unsigned int i = 0; i < 6; ++i)
 	{
-		if(!gumTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internalFormat, this->v2Size, 0, format, datatype, 0))
+		if(!gumTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internalFormat, this->v2Size, 0, format, texture->getDatatype(), 0))
             Gum::Output::error("Framebuffer::addCubeTextureAttachment: glTexImage Failed.");
         //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, texture->getID(), 0);
         attachTexture(index, texture, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i);
@@ -126,14 +129,16 @@ TextureCube* Framebuffer::addCubeTextureAttachment(unsigned int index, std::stri
 	glDrawBuffers(vDrawBuffers.size(), &vDrawBuffers[0]);
         
     #ifdef CHECK_GL_ERRORS
-    checkStatus();
+    checkStatus("addCubeTextureAttachment");
     #endif
     currFramebuffer->bind();
 
     return texture;
 }
 
-TextureCube* Framebuffer::addCubeTextureAttachment(unsigned int index, TextureCube* texture)
+template tTextureCube<unsigned char>* Framebuffer::addCubeTextureAttachment(unsigned int, tTextureCube<unsigned char>*);
+template tTextureCube<float>* Framebuffer::addCubeTextureAttachment(unsigned int, tTextureCube<float>*);
+template<typename T> tTextureCube<T>* Framebuffer::addCubeTextureAttachment(unsigned int index, tTextureCube<T>* texture)
 {
    if(std::find(vDrawBuffers.begin(), vDrawBuffers.end(), index) != vDrawBuffers.end())
     {
@@ -155,14 +160,14 @@ TextureCube* Framebuffer::addCubeTextureAttachment(unsigned int index, TextureCu
 	glDrawBuffers(vDrawBuffers.size(), &vDrawBuffers[0]);
         
     #ifdef CHECK_GL_ERRORS
-    checkStatus();
+    checkStatus("addCubeTextureAttachment");
     #endif
     currFramebuffer->bind();
 
     return texture;
 }
 
-TextureDepth* Framebuffer::addDepthTextureAttachment(std::string name)
+Texture* Framebuffer::addDepthTextureAttachment(std::string name)
 {
     if(this->pDepthTexture != nullptr)
     {
@@ -177,21 +182,49 @@ TextureDepth* Framebuffer::addDepthTextureAttachment(std::string name)
 
     Framebuffer* currFramebuffer = CurrentlyBoundFramebuffer;
     bind();
-    pDepthTexture = new TextureDepth(name, Gum::Graphics::Datatypes::FLOAT);
+    pDepthTexture = new TextureDepth2D(name, Gum::Graphics::Datatypes::FLOAT);
     pDepthTexture->bind();
-    pDepthTexture->setSize(v2Size);
+    ((TextureDepth2D*)pDepthTexture)->setSize(v2Size);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, this->pDepthTexture->getID(), 0);
     pDepthTexture->unbind();
     
     #ifdef CHECK_GL_ERRORS
-    checkStatus();
+    checkStatus("addDepthTextureAttachment");
+    #endif
+    currFramebuffer->bind();
+    return this->pDepthTexture;
+}
+
+Texture* Framebuffer::addDepthTextureArrayAttachment(const unsigned int& numlayers, std::string name)
+{
+    if(this->pDepthTexture != nullptr)
+    {
+        Gum::Output::error("Framebuffer: Depthtexture has already been attached");
+        return pDepthTexture;
+    }
+    else if(this->iDepthBufferID != 0)
+    {
+        Gum::Output::error("Framebuffer: Depthattachment has already been attached");
+        return nullptr;
+    }
+
+    Framebuffer* currFramebuffer = CurrentlyBoundFramebuffer;
+    bind();
+    pDepthTexture = new TextureDepth3D(numlayers, name, Gum::Graphics::Datatypes::FLOAT);
+    pDepthTexture->bind();
+    ((TextureDepth3D*)pDepthTexture)->setSize(v2Size);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, this->pDepthTexture->getID(), 0);
+    pDepthTexture->unbind();
+    
+    #ifdef CHECK_GL_ERRORS
+    checkStatus("addDepthTextureArrayAttachment");
     #endif
     currFramebuffer->bind();
     return this->pDepthTexture;
 }
 
 
-TextureDepth* Framebuffer::addDepthStencilTextureAttachment(std::string name)
+Texture* Framebuffer::addDepthStencilTextureAttachment(std::string name)
 {
     if(this->pDepthTexture != nullptr)
     {
@@ -207,7 +240,7 @@ TextureDepth* Framebuffer::addDepthStencilTextureAttachment(std::string name)
     Framebuffer* currFramebuffer = CurrentlyBoundFramebuffer;
     bind();
     //Gum::Output::print("Adding stencildepthbuffer to " + this->getTextureAttachment()->getName());
-    this->pDepthTexture = new TextureDepth(name);
+    this->pDepthTexture = new TextureDepth2D(name);
     //glDrawBuffer(GL_BACK);
     this->pDepthTexture->bind();
     if(!gumTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, this->v2Size, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, NULL))
@@ -217,7 +250,7 @@ TextureDepth* Framebuffer::addDepthStencilTextureAttachment(std::string name)
     this->pDepthTexture->unbind();
     
     #ifdef CHECK_GL_ERRORS
-    checkStatus();
+    checkStatus("addDepthStencilTextureAttachment");
     #endif
     currFramebuffer->bind();
     return this->pDepthTexture;
@@ -240,7 +273,7 @@ void Framebuffer::addDepthAttachment()
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, this->iDepthBufferID);
 
     #ifdef CHECK_GL_ERRORS
-    checkStatus();
+    checkStatus("addDepthAttachment");
     #endif
     currFramebuffer->bind();
 }
@@ -251,7 +284,7 @@ void Framebuffer::attachTexture(const int& index, Texture* texture, const unsign
     bind();
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, target, texture->getID(), mipmaplevel);
     #ifdef CHECK_GL_ERRORS
-    checkStatus();
+    checkStatus("attachTexture");
     #endif
     currFramebuffer->bind();
 }
@@ -264,18 +297,18 @@ void Framebuffer::blitDepthToOtherFramebuffer(Framebuffer* fbo)
 }
 
 
-void Framebuffer::checkStatus()
+void Framebuffer::checkStatus(std::string funcname)
 {
     GLenum status;
     switch((status = glCheckFramebufferStatus(GL_FRAMEBUFFER)))
     {
         case GL_FRAMEBUFFER_COMPLETE: break; //Everything is fine
-        case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:          Gum::Output::error("Framebuffer: Incomplete Attachment"); break;
-        case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:  Gum::Output::error("Framebuffer: Missing Attachment"); break;
-        case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:         Gum::Output::error("Framebuffer: Incomplete Drawbuffer"); break;
-        case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:         Gum::Output::error("Framebuffer: Incomplete Readbuffer"); break;
-        case GL_FRAMEBUFFER_UNSUPPORTED:                    Gum::Output::error("Framebuffer: Framebuffer Unsupported"); break;
-        default:                                            Gum::Output::error("Framebuffer: Status error: " + Tools::decToHex(status));
+        case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:          Gum::Output::error("Framebuffer ("+funcname+"): Incomplete Attachment"); break;
+        case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:  Gum::Output::error("Framebuffer ("+funcname+"): Missing Attachment"); break;
+        case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:         Gum::Output::error("Framebuffer ("+funcname+"): Incomplete Drawbuffer"); break;
+        case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:         Gum::Output::error("Framebuffer ("+funcname+"): Incomplete Readbuffer"); break;
+        case GL_FRAMEBUFFER_UNSUPPORTED:                    Gum::Output::error("Framebuffer ("+funcname+"): Framebuffer Unsupported"); break;
+        default:                                            Gum::Output::error("Framebuffer ("+funcname+"): Status error: " + Tools::decToHex(status));
     }
 }
 
@@ -310,7 +343,10 @@ void Framebuffer::resizeTextures()
     }
     else if(this->pDepthTexture != nullptr)
     {
-        pDepthTexture->setSize(v2Size);
+        if(pDepthTexture->getType() == Texture::TEXTUREDEPTH2D)
+            ((TextureDepth2D*)pDepthTexture)->setSize(v2Size);
+        else
+            ((TextureDepth3D*)pDepthTexture)->setSize(v2Size);
     }
     currFramebuffer->bind();
 }
@@ -330,7 +366,7 @@ void Framebuffer::setDepthAttachment(unsigned int attachment)
     currFramebuffer->bind();
 }
 
-void Framebuffer::setDepthTextureAttachment(TextureDepth* depthMap)
+void Framebuffer::setDepthTextureAttachment(Texture* depthMap)
 {
     this->pDepthTexture = depthMap;
     Framebuffer* currFramebuffer = CurrentlyBoundFramebuffer;

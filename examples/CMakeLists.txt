@@ -91,12 +91,15 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../src/)
 
 link_directories(${CMAKE_BINARY_DIR}/src/)
 
-add_definitions(-DEXAMPLES_PATH=\"${CMAKE_SOURCE_DIR}/examples\")
+add_definitions(-DEXAMPLES_PATH=\"${CMAKE_CURRENT_SOURCE_DIR}/../examples\")
 
-set(EXAMPLE_FILE_LIST )
+set(EXAMPLE_FILE_LIST ObjectInfoWriter)
 
 foreach(EXAMPLE ${EXAMPLE_FILE_LIST})
     message(STATUS "Adding target ${EXAMPLE}")
-    add_executable(Example_${EXAMPLE} "./${EXAMPLE}.cpp")
+    file(GLOB_RECURSE SRC 
+    "./${EXAMPLE}/*.cpp"
+    )
+    add_executable(Example_${EXAMPLE} "./${EXAMPLE}.cpp" ${SRC})
     target_link_libraries(Example_${EXAMPLE} "${GUM_LIBRARIES}")
 endforeach()

@@ -1,3 +1,4 @@
+#include "Essentials/Tools.h"
 #include <Graphics/ShaderProgram.h>
 #include <System/Output.h>
 #include <GL/glew.h>
@@ -72,13 +73,22 @@ void ShaderProgram::unuse() { glUseProgram(0);          setCurrentlyBoundShader(
 
 int ShaderProgram::getUniformLocation(const std::string& UniformName) { return glGetUniformLocation(iProgramID, UniformName.c_str()); }
 
-void ShaderProgram::loadUniform(const std::string& uniformName, const bool& var) 				{ glUniform1i(Locations[uniformName], var); }
-void ShaderProgram::loadUniform(const std::string& uniformName, const vec2& var) 				{ glUniform2f(Locations[uniformName], var.x, var.y); }
-void ShaderProgram::loadUniform(const std::string& uniformName, const ivec2& var) 				{ glUniform2i(Locations[uniformName], var.x, var.y); }
-void ShaderProgram::loadUniform(const std::string& uniformName, const vec3& var) 				{ glUniform3f(Locations[uniformName], var.x, var.y, var.z); }
-void ShaderProgram::loadUniform(const std::string& uniformName, const ivec3& var) 		    	{ glUniform3i(Locations[uniformName], var.x, var.y, var.z); }
-void ShaderProgram::loadUniform(const std::string& uniformName, const vec4& var) 				{ glUniform4f(Locations[uniformName], var.x, var.y, var.z, var.w); }
-void ShaderProgram::loadUniform(const std::string& uniformName, const mat4& var) 			    { glUniformMatrix4fv(Locations[uniformName], 1, GL_FALSE, &var[0][0]); }
-void ShaderProgram::loadUniform(const std::string& uniformName, const float& var) 				{ glUniform1f(Locations[uniformName], var); }
-void ShaderProgram::loadUniform(const std::string& uniformName, const int& var) 				{ glUniform1i(Locations[uniformName], var); }
-void ShaderProgram::loadUniform(const std::string& uniformName, const std::vector<mat4>& var) 	{ for (size_t i = 0; i < var.size(); i++) { loadUniform(uniformName + "[" + std::to_string(i) + "]", var[i]); } }
+void ShaderProgram::loadUniform(const std::string& uniformName, const bool& var) 				{ if(!Tools::mapHasKey(Locations, uniformName)) Gum::Output::error(sName + ": Uniform " + uniformName + " does not exist!"); glUniform1i(Locations[uniformName], var); }
+void ShaderProgram::loadUniform(const std::string& uniformName, const vec2& var) 				{ if(!Tools::mapHasKey(Locations, uniformName)) Gum::Output::error(sName + ": Uniform " + uniformName + " does not exist!"); glUniform2f(Locations[uniformName], var.x, var.y); }
+void ShaderProgram::loadUniform(const std::string& uniformName, const ivec2& var) 				{ if(!Tools::mapHasKey(Locations, uniformName)) Gum::Output::error(sName + ": Uniform " + uniformName + " does not exist!"); glUniform2i(Locations[uniformName], var.x, var.y); }
+void ShaderProgram::loadUniform(const std::string& uniformName, const vec3& var) 				{ if(!Tools::mapHasKey(Locations, uniformName)) Gum::Output::error(sName + ": Uniform " + uniformName + " does not exist!"); glUniform3f(Locations[uniformName], var.x, var.y, var.z); }
+void ShaderProgram::loadUniform(const std::string& uniformName, const ivec3& var) 		    	{ if(!Tools::mapHasKey(Locations, uniformName)) Gum::Output::error(sName + ": Uniform " + uniformName + " does not exist!"); glUniform3i(Locations[uniformName], var.x, var.y, var.z); }
+void ShaderProgram::loadUniform(const std::string& uniformName, const vec4& var) 				{ if(!Tools::mapHasKey(Locations, uniformName)) Gum::Output::error(sName + ": Uniform " + uniformName + " does not exist!"); glUniform4f(Locations[uniformName], var.x, var.y, var.z, var.w); }
+void ShaderProgram::loadUniform(const std::string& uniformName, const mat4& var) 			    { if(!Tools::mapHasKey(Locations, uniformName)) Gum::Output::error(sName + ": Uniform " + uniformName + " does not exist!"); glUniformMatrix4fv(Locations[uniformName], 1, GL_FALSE, &var[0][0]); }
+void ShaderProgram::loadUniform(const std::string& uniformName, const float& var) 				{ if(!Tools::mapHasKey(Locations, uniformName)) Gum::Output::error(sName + ": Uniform " + uniformName + " does not exist!"); glUniform1f(Locations[uniformName], var); }
+void ShaderProgram::loadUniform(const std::string& uniformName, const int& var) 				{ if(!Tools::mapHasKey(Locations, uniformName)) Gum::Output::error(sName + ": Uniform " + uniformName + " does not exist!"); glUniform1i(Locations[uniformName], var); }
+
+
+void ShaderProgram::loadUniform(const std::string& uniformName, const std::vector<vec2>& var)   { if(!Tools::mapHasKey(Locations, uniformName + "[0]")) Gum::Output::error(sName + ": Uniform " + uniformName + " does not exist!"); glUniform2fv(Locations[uniformName + "[0]"], var.size(), &var[0].x); }
+void ShaderProgram::loadUniform(const std::string& uniformName, const std::vector<ivec2>& var)  { if(!Tools::mapHasKey(Locations, uniformName + "[0]")) Gum::Output::error(sName + ": Uniform " + uniformName + " does not exist!"); glUniform2iv(Locations[uniformName + "[0]"], var.size(), &var[0].x); }
+void ShaderProgram::loadUniform(const std::string& uniformName, const std::vector<vec3>& var)   { if(!Tools::mapHasKey(Locations, uniformName + "[0]")) Gum::Output::error(sName + ": Uniform " + uniformName + " does not exist!"); glUniform3fv(Locations[uniformName + "[0]"], var.size(), &var[0].x); }
+void ShaderProgram::loadUniform(const std::string& uniformName, const std::vector<ivec3>& var)  { if(!Tools::mapHasKey(Locations, uniformName + "[0]")) Gum::Output::error(sName + ": Uniform " + uniformName + " does not exist!"); glUniform3iv(Locations[uniformName + "[0]"], var.size(), &var[0].x); }
+void ShaderProgram::loadUniform(const std::string& uniformName, const std::vector<vec4>& var)   { if(!Tools::mapHasKey(Locations, uniformName + "[0]")) Gum::Output::error(sName + ": Uniform " + uniformName + " does not exist!"); glUniform4fv(Locations[uniformName + "[0]"], var.size(), &var[0].x); }
+void ShaderProgram::loadUniform(const std::string& uniformName, const std::vector<mat4>& var)   { if(!Tools::mapHasKey(Locations, uniformName + "[0]")) Gum::Output::error(sName + ": Uniform " + uniformName + " does not exist!"); glUniformMatrix4fv(Locations[uniformName + "[0]"], var.size(), GL_FALSE, &var[0][0][0]); }
+void ShaderProgram::loadUniform(const std::string& uniformName, const std::vector<float>& var)  { if(!Tools::mapHasKey(Locations, uniformName + "[0]")) Gum::Output::error(sName + ": Uniform " + uniformName + " does not exist!"); glUniform1fv(Locations[uniformName + "[0]"], var.size(), var.data()); }
+void ShaderProgram::loadUniform(const std::string& uniformName, const std::vector<int>& var)    { if(!Tools::mapHasKey(Locations, uniformName + "[0]")) Gum::Output::error(sName + ": Uniform " + uniformName + " does not exist!"); glUniform1iv(Locations[uniformName + "[0]"], var.size(), var.data()); }

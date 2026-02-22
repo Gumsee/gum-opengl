@@ -65,7 +65,7 @@ void Texture2DBasic::clampToEdge(bool border)
     unbind();
 }
 
-void Texture2DBasic::setFiltering(Texture::FilteringTypes filteringtype) 
+void Texture2DBasic::setFiltering(Texture::FilteringType filteringtype) 
 {
     bind();
     int filtering = 0;
