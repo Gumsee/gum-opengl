@@ -3,6 +3,12 @@
 #include <System/Output.h>
 #include <GL/glew.h>
 
+
+template<typename T>
+tTexture2D<T>::~tTexture2D()
+{
+}
+
 template<typename T>
 void tTexture2D<T>::bind(const int& index)
 {

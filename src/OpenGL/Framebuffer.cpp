@@ -51,7 +51,7 @@ void Framebuffer::unbind(const ivec2& viewportsize)
     }
     else
     {
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glBindFramebuffer(GL_FRAMEBUFFER, DefaultFramebufferID);
         if(viewportsize != ivec2(0,0))
             glViewport(0, 0, viewportsize.x, viewportsize.y);
     }
@@ -391,4 +391,17 @@ color Framebuffer::getPixel(ivec2 pos)
     currFramebuffer->bind();
 
     return pixelcolor;
+}
+
+bool Framebuffer::readPixelData(void* image, ivec2 position, ivec2 size, unsigned int pixelformat, unsigned int datatype)
+{
+    Framebuffer* currFramebuffer = CurrentlyBoundFramebuffer;
+    bind();
+    glReadPixels(position.x, position.y, size.x, size.y, pixelformat, datatype, image);
+
+    
+    if(currFramebuffer != nullptr)
+      currFramebuffer->bind();
+  
+    return true;
 }
