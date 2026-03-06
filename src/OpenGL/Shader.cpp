@@ -1,5 +1,7 @@
 #include <Graphics/Shader.h>
+#include <Graphics/Graphics.h>
 #include <GL/glew.h>
+#include <regex>
 
 const unsigned int Shader::TYPES::VERTEX_SHADER                  = GL_VERTEX_SHADER;
 const unsigned int Shader::TYPES::FRAGMENT_SHADER                = GL_FRAGMENT_SHADER;
@@ -21,6 +23,11 @@ void Shader::destroyNative()
 
 std::string Shader::compile()
 {
+    if(size_t foundStrPos = sSource.find_first_of(GUM_SHADER_VERSION_STR) != std::string::npos)
+    {
+        std::string ver = "#version "+std::to_string(Gum::Graphics::VARS::SHADING_LANGUAGE_MAJOR_VERSION)+std::to_string(Gum::Graphics::VARS::SHADING_LANGUAGE_MINOR_VERSION)+" core \n";
+        sSource = std::regex_replace(sSource, std::regex(GUM_SHADER_VERSION_STR), ver);
+    }
     const char* shaderStr = this->sSource.c_str();
     glShaderSource(iShaderID, 1, &shaderStr, nullptr); //Pass sourceCode to OpenGL
     glCompileShader(iShaderID); //compile the shader
@@ -42,6 +49,7 @@ std::string Shader::compile()
         //Exit with failure.
         glDeleteShader(iShaderID); //Don't leak the shader.
 
+        std::cout << sSource << std::endl;
         //Print error log and quit
         return errorLog;
     }
