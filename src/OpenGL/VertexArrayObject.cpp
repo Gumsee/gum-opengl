@@ -69,6 +69,17 @@ void VertexArrayObject::addAttributeNative(const unsigned int& index, const unsi
         glVertexAttribPointer(index, dimension, type, GL_FALSE, stride, (void*)offset);
     glVertexAttribDivisor(index, divisor);
     vAttributes.push_back(index);
+
+    #ifdef CHECK_GL_ERRORS
+        GLenum error = 0;
+        const char *errString;
+        while((error = glGetError()) != GL_NO_ERROR) 
+        {
+            errString = reinterpret_cast<const char*>(gluErrorString(error));
+            if(errString != nullptr)
+                Gum::Output::error(std::string("addAttributeNative: ") + errString);
+        }
+    #endif
 }
 
 

@@ -6,7 +6,9 @@
 
 bool gumTexImage2D(const unsigned int& target, const int& level, const int& internalformat, ivec2 size, const int& border, const unsigned int& format, const unsigned int& type, const void* pixels)
 {
-    glUnmapBuffer(GL_TEXTURE_BUFFER);
+    //Maybe necessary
+    //glUnmapBuffer(GL_TEXTURE_BUFFER);
+
     #ifdef CHECK_GL_ERRORS
         std::string callInfoStr = " Callinfo: target: " + Tools::decToHex(target) + ", level: " + std::to_string(level) + ", internalformat: " + Tools::decToHex(internalformat) + 
                                     ", size: " + size.toString() + ", border: " + std::to_string(border) + 
@@ -29,11 +31,11 @@ bool gumTexImage2D(const unsigned int& target, const int& level, const int& inte
 
         GLenum error = 0;
         const char *errString;
-        while(error = glGetError() != GL_NO_ERROR) 
+        while((error = glGetError()) != GL_NO_ERROR) 
         {
             errString = reinterpret_cast<const char*>(gluErrorString(error));
             if(errString != nullptr)
-                Gum::Output::error(errString);
+                Gum::Output::error(std::string("pre glTexImage2D: ") + errString + callInfoStr);
         } //Empty errors
     #endif
 

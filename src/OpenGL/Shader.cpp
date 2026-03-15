@@ -23,7 +23,7 @@ void Shader::destroyNative()
 
 std::string Shader::compile()
 {
-    if(size_t foundStrPos = sSource.find_first_of(GUM_SHADER_VERSION_STR) != std::string::npos)
+    if(sSource.find_first_of(GUM_SHADER_VERSION_STR) != std::string::npos)
     {
         std::string ver = "#version "+std::to_string(Gum::Graphics::VARS::SHADING_LANGUAGE_MAJOR_VERSION)+std::to_string(Gum::Graphics::VARS::SHADING_LANGUAGE_MINOR_VERSION)+" core \n";
         sSource = std::regex_replace(sSource, std::regex(GUM_SHADER_VERSION_STR), ver);
