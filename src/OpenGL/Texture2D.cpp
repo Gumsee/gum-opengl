@@ -3,12 +3,6 @@
 #include <System/Output.h>
 #include <GL/glew.h>
 
-
-template<typename T>
-tTexture2D<T>::~tTexture2D()
-{
-}
-
 template<typename T>
 void tTexture2D<T>::bind(const int& index)
 {
@@ -103,3 +97,6 @@ void tTexture2D<T>::setFiltering(FilteringType filteringtype)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filtering);
     unbind();
 }
+
+template class tTexture2D<unsigned char>;
+template class tTexture2D<float>;

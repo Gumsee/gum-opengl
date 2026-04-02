@@ -86,3 +86,6 @@ void tTexture3D<T>::setFiltering(FilteringType filteringtype)
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, filtering);
     unbind();
 }
+
+template class tTexture3D<unsigned char>;
+template class tTexture3D<float>;

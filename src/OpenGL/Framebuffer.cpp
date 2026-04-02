@@ -64,9 +64,9 @@ void Framebuffer::clear(const unsigned short& flags)
     glClear(flags);
 }
 
-template tTexture2D<unsigned char>* Framebuffer::addTextureAttachment(unsigned int, std::string, uint16_t);
-template tTexture2D<float>* Framebuffer::addTextureAttachment(unsigned int, std::string, uint16_t);
-template<typename T> tTexture2D<T>* Framebuffer::addTextureAttachment(unsigned int index, std::string name, uint16_t numChannels)
+template tTexture2D<unsigned char>* Framebuffer::addTextureAttachment(uint8_t, std::string, uint16_t);
+template tTexture2D<float>* Framebuffer::addTextureAttachment(uint8_t, std::string, uint16_t);
+template<typename T> tTexture2D<T>* Framebuffer::addTextureAttachment(uint8_t index, std::string name, uint16_t numChannels)
 {
     if(std::find(vDrawBuffers.begin(), vDrawBuffers.end(), index) != vDrawBuffers.end())
     {
@@ -96,9 +96,9 @@ template<typename T> tTexture2D<T>* Framebuffer::addTextureAttachment(unsigned i
     return texture;
 }
 
-template tTextureCube<unsigned char>* Framebuffer::addCubeTextureAttachment(unsigned int, std::string, uint16_t, uint16_t);
-template tTextureCube<float>* Framebuffer::addCubeTextureAttachment(unsigned int, std::string, uint16_t, uint16_t);
-template<typename T> tTextureCube<T>* Framebuffer::addCubeTextureAttachment(unsigned int index, std::string name, uint16_t format, uint16_t internalFormat)
+template tTextureCube<unsigned char>* Framebuffer::addCubeTextureAttachment(uint8_t, std::string, uint16_t, uint16_t);
+template tTextureCube<float>* Framebuffer::addCubeTextureAttachment(uint8_t, std::string, uint16_t, uint16_t);
+template<typename T> tTextureCube<T>* Framebuffer::addCubeTextureAttachment(uint8_t index, std::string name, uint16_t format, uint16_t internalFormat)
 {
     if(std::find(vDrawBuffers.begin(), vDrawBuffers.end(), index) != vDrawBuffers.end())
     {
@@ -115,13 +115,13 @@ template<typename T> tTextureCube<T>* Framebuffer::addCubeTextureAttachment(unsi
     Framebuffer* currFramebuffer = CurrentlyBoundFramebuffer;
     bind();
     texture->bind();
-    for (unsigned int i = 0; i < 6; ++i)
-	{
-		if(!gumTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internalFormat, this->v2Size, 0, format, texture->getDatatype(), 0))
-            Gum::Output::error("Framebuffer::addCubeTextureAttachment: glTexImage Failed.");
-        //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, texture->getID(), 0);
-        attachTexture(index, texture, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i);
-	}
+    for (unsigned short i = 0; i < 6; ++i)
+    {
+      if(!gumTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internalFormat, this->v2Size, 0, format, texture->getDatatype(), 0))
+              Gum::Output::error("Framebuffer::addCubeTextureAttachment: glTexImage Failed.");
+          //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, texture->getID(), 0);
+          attachTexture(index, texture, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i);
+    }
     texture->unbind();
 
     //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, GL_TEXTURE_CUBE_MAP_POSITIVE_X, texture->getID(), 0);
@@ -136,9 +136,9 @@ template<typename T> tTextureCube<T>* Framebuffer::addCubeTextureAttachment(unsi
     return texture;
 }
 
-template tTextureCube<unsigned char>* Framebuffer::addCubeTextureAttachment(unsigned int, tTextureCube<unsigned char>*);
-template tTextureCube<float>* Framebuffer::addCubeTextureAttachment(unsigned int, tTextureCube<float>*);
-template<typename T> tTextureCube<T>* Framebuffer::addCubeTextureAttachment(unsigned int index, tTextureCube<T>* texture)
+template tTextureCube<unsigned char>* Framebuffer::addCubeTextureAttachment(uint8_t, tTextureCube<unsigned char>*);
+template tTextureCube<float>* Framebuffer::addCubeTextureAttachment(uint8_t, tTextureCube<float>*);
+template<typename T> tTextureCube<T>* Framebuffer::addCubeTextureAttachment(uint8_t index, tTextureCube<T>* texture)
 {
    if(std::find(vDrawBuffers.begin(), vDrawBuffers.end(), index) != vDrawBuffers.end())
     {
@@ -151,7 +151,7 @@ template<typename T> tTextureCube<T>* Framebuffer::addCubeTextureAttachment(unsi
     Framebuffer* currFramebuffer = CurrentlyBoundFramebuffer;
     bind();
     texture->bind();
-    for (unsigned int i = 0; i < 6; ++i)
+    for (unsigned short i = 0; i < 6; ++i)
         attachTexture(index, texture, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i);
     texture->unbind();
 

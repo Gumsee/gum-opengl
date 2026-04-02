@@ -12,5 +12,5 @@ void ElementBufferObject::setData(const std::vector<unsigned int>& indices)
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(indices[0]), &indices[0], GL_STATIC_DRAW);
     unbind();
     
-    iLength = indices.size();
+    iLength = (unsigned int)indices.size();
 }

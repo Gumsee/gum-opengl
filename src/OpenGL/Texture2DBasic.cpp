@@ -27,6 +27,7 @@ void Texture2DBasic::unbind(const int& index)
 
 void Texture2DBasic::updateImage(const ivec2& size, const int& numchannels, const void* data, uint16_t datatype)
 {
+    v2Size = size;
     bind(0);
     int pixelformat = GL_RGBA;
     int pixelinternalformat = GL_RGBA;

@@ -86,3 +86,6 @@ void tTextureCube<T>::setFiltering(FilteringType filteringtype)
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, filtering);
     unbind();
 }
+
+template class tTextureCube<unsigned char>;
+template class tTextureCube<float>;

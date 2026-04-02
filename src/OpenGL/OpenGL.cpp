@@ -28,20 +28,19 @@ namespace Graphics
 
     void printInfo()
     {
-        Gum::Output::print(
-        std::string("GraphicsContext Info:\n") +
-            "  RenderEngine: "            + VARS::RENDERER + "\n" +
-            "  OpenGL version supported " + VARS::VERSION + "\n" +
-            "  GLSL version supported "   + std::to_string(VARS::SHADING_LANGUAGE_MAJOR_VERSION) + "." + std::to_string(VARS::SHADING_LANGUAGE_MINOR_VERSION) + "\n" +
-            "  OpenGL Version "           + std::to_string(VARS::MAJOR_VERSION) + "." + std::to_string(VARS::MINOR_VERSION) + "\n" +
-            "  OpenGL Graphics Vendor: "  + VARS::VENDOR
-        );
+      std::string spacer = Gum::Output::getOutputSpacing();
+      Gum::Output::info(std::string("OpenGL info:\n") +
+        spacer + " Renderer: "         + VARS::RENDERER + "\n" +
+        spacer + " OpenGL version "    + VARS::VERSION + "\n" +
+        spacer + " GLSL version "      + std::to_string(VARS::SHADING_LANGUAGE_MAJOR_VERSION) + "." + std::to_string(VARS::SHADING_LANGUAGE_MINOR_VERSION) + "\n" +
+        spacer + " Graphics Vendor: "  + VARS::VENDOR
+      );
     }
 
     void init()
     {        
         //Initialize OpenGL Variables and glew
-        Gum::Output::info("Initializing OpenGL Variables...");
+        Gum::Output::debug("Initializing OpenGL Variables...");
 
         #if defined GUM_OS_LINUX
             GLenum err = glewInit();
@@ -62,9 +61,9 @@ namespace Graphics
         VARS::VENDOR = reinterpret_cast<const char*>(glGetString(GL_VENDOR));
         crate<std::string> shaderver = Tools::splitStr(reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION)), '.');
         if(shaderver.size() > 0)
-            VARS::SHADING_LANGUAGE_MAJOR_VERSION = Tools::StringToInt(shaderver[0]);
+            VARS::SHADING_LANGUAGE_MAJOR_VERSION = Tools::StringToNum<int>(shaderver[0]);
         if(shaderver.size() > 1)
-            VARS::SHADING_LANGUAGE_MINOR_VERSION = Tools::StringToInt(shaderver[1]);
+            VARS::SHADING_LANGUAGE_MINOR_VERSION = Tools::StringToNum<int>(shaderver[1]);
 
         glGetIntegerv(GL_MAJOR_VERSION, &VARS::MAJOR_VERSION);
         glGetIntegerv(GL_MINOR_VERSION, &VARS::MINOR_VERSION);
@@ -72,7 +71,7 @@ namespace Graphics
 
         glGetIntegerv(GL_MAX_TEXTURE_SIZE, &VARS::MAX_TEXTURE_SIZE);
 
-        Gum::Output::info("Successfully initialized OpenGL Variables!");
+        Gum::Output::debug("Successfully initialized OpenGL Variables!");
     }
 
 
