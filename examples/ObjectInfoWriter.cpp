@@ -24,7 +24,7 @@ int main(int argc, char** argv)
         return 1;
     }
     
-	Mesh* mainMesh = new Mesh();
+	Mesh* mainMesh = Mesh::getMesh("main");
 	Scene3DLoader loader;
     loader.iterateMeshes([mainMesh](unsigned int currentMesh, unsigned int numMeshes, Mesh* mesh, Bone* rootbone, std::vector<Bone*> bones) {
 		mainMesh->addMesh(mesh);

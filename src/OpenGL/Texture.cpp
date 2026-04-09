@@ -4,7 +4,7 @@
 
 void Texture::createNative()
 {
-    gumGenTextures(1, &iTextureID);
+  gumGenTextures(1, &iTextureID);
 }
 
 void Texture::destroyNative()
