@@ -30,7 +30,7 @@ void Framebuffer::createNative()
 
 void Framebuffer::destroyNative()
 {
-    if(this->iID != 0)
+    if(this->iID != 0u)
 	    glDeleteFramebuffers(1, &this->iID);
 }
 

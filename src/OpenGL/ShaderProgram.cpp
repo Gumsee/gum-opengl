@@ -17,10 +17,8 @@ void ShaderProgram::destroyNative()
 
 void ShaderProgram::linkShaders() 
 {
-	for(size_t i = 0; i < vShaders.size(); i++)
-	{
-		glAttachShader(this->iProgramID, vShaders[i]->getShaderID());
-	}
+	for(Shader* shader : vShaders)
+		glAttachShader(this->iProgramID, shader->getShaderID());
 
 	//Link our program
 	glLinkProgram(this->iProgramID);
@@ -53,9 +51,9 @@ void ShaderProgram::linkShaders()
 	}
 
 	//Always detach shaders after a successful link.
-	for(size_t i = 0; i < vShaders.size(); i++)
+	for(Shader* shader : vShaders)
 	{
-		glDetachShader(this->iProgramID, vShaders[i]->getShaderID());
+		glDetachShader(this->iProgramID, shader->getShaderID());
 		//glDeleteShader(vShaders[i]->getShaderID());
 	}
 }
