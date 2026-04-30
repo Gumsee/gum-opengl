@@ -1,7 +1,7 @@
 #include <Graphics/Texture2D.h>
 #include <Graphics/WrapperFunctions.h>
 #include <System/Output.h>
-#include <GL/glew.h>
+#include <glad/gl.h>
 
 template<typename T>
 void tTexture2D<T>::bind(const int& index)

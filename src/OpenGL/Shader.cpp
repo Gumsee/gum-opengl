@@ -1,7 +1,7 @@
 #include <Graphics/Shader.h>
 #include <Graphics/Graphics.h>
-#include <GL/glew.h>
 #include <regex>
+#include <glad/gl.h>
 
 const unsigned int Shader::TYPES::VERTEX_SHADER                  = GL_VERTEX_SHADER;
 const unsigned int Shader::TYPES::FRAGMENT_SHADER                = GL_FRAGMENT_SHADER;

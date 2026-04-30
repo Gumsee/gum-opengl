@@ -1,5 +1,5 @@
 #include <Graphics/Variables.h>
-#include <GL/glew.h>
+#include <glad/gl.h>
 
 const unsigned short Gum::Graphics::Datatypes::UNSIGNED_CHAR   = GL_UNSIGNED_BYTE;
 const unsigned short Gum::Graphics::Datatypes::FLOAT           = GL_FLOAT;
@@ -19,8 +19,8 @@ const unsigned short Gum::Graphics::Features::FRAMEBUFFER_SRGB = GL_FRAMEBUFFER_
 const uint16_t Gum::Graphics::Pixelformat::RGBA        = GL_RGBA;
 const uint16_t Gum::Graphics::Pixelformat::RGB         = GL_RGB;
 const uint16_t Gum::Graphics::Pixelformat::RG          = GL_RG;
-const uint16_t Gum::Graphics::Pixelformat::R           = GL_R;
-//const uint16_t Gum::Graphics::Pixelformat::BGRA        = GL_BGRA;
-//const uint16_t Gum::Graphics::Pixelformat::BGR         = GL_BGR;
+const uint16_t Gum::Graphics::Pixelformat::R           = GL_RED;
+const uint16_t Gum::Graphics::Pixelformat::BGRA        = GL_BGRA;
+const uint16_t Gum::Graphics::Pixelformat::BGR         = GL_BGR;
 const uint16_t Gum::Graphics::Pixelformat::RGBA16F     = GL_RGBA16F;
 const uint16_t Gum::Graphics::Pixelformat::RGBA32F     = GL_RGBA32F;

@@ -2,7 +2,7 @@
 #include <Graphics/Texture2DBasic.h>
 #include <Graphics/Texture2D.h>
 #include <Graphics/WrapperFunctions.h>
-#include <GL/glew.h>
+#include <glad/gl.h>
 
 void Texture2DBasic::createNative()
 {

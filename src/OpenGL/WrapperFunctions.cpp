@@ -2,7 +2,13 @@
 #include <Essentials/Tools.h>
 #include <System/Output.h>
 #include <System/MemoryManagement.h>
-#include <GL/glew.h>
+#include <glad/gl.h>
+#include <GL/glu.h>
+
+std::string graphicsErrorCodeToString(const unsigned int& error)
+{
+  return reinterpret_cast<const char*>(gluErrorString(error));
+}
 
 bool gumTexImage2D(const unsigned int& target, const int& level, const int& internalformat, ivec2 size, const int& border, const unsigned int& format, const unsigned int& type, const void* pixels)
 {
@@ -30,13 +36,9 @@ bool gumTexImage2D(const unsigned int& target, const int& level, const int& inte
                                                         { Gum::Output::error("glTexImage2D: Texture format is GL_DEPTH_COMPONENT and internalformat is invalid." + callInfoStr); }
 
         GLenum error = 0;
-        const char *errString;
-        while((error = glGetError()) != GL_NO_ERROR) 
-        {
-            errString = reinterpret_cast<const char*>(gluErrorString(error));
-            if(errString != nullptr)
-                Gum::Output::error(std::string("pre glTexImage2D: ") + errString + callInfoStr);
-        } //Empty errors
+        while((error = glGetError()) != GL_NO_ERROR) //Empty errors
+          Gum::Output::error(std::string("pre glTexImage2D: ") + graphicsErrorCodeToString(error) + callInfoStr);
+        
     #endif
 
 

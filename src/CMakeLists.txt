@@ -4,17 +4,14 @@
 file(GLOB_RECURSE SRC "${CMAKE_CURRENT_LIST_DIR}/*.cpp")
 add_library(${PROJECT_NAME} STATIC ${SRC})
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../external/)
-
 macro(add_guminclude LIBNAME)
   if(${LIBNAME}_FOUND)
       include_directories(${${LIBNAME}_INCLUDE_DIRS})
   else()
-      message(FATAL_ERROR "Library for ${LIBNAME} cannot not found")
+      message(FATAL_ERROR "Library for ${LIBNAME} cannot not be found")
   endif() 
 endmacro()
 
-add_guminclude(OPENGL)
 add_guminclude(GUMGRAPHICS)
 add_guminclude(GUMCODECS)
 add_guminclude(GUMPRIMITIVES)
@@ -23,6 +20,7 @@ add_guminclude(GUMDESKTOP)
 add_guminclude(GUMSYSTEM)
 add_guminclude(GUMMATHS)
 
+include_directories(${CMAKE_CURRENT_LIST_DIR}/../external/glad/include)
 
 # Specify where the library is and where to find the headers
 set_target_properties(${PROJECT_NAME}

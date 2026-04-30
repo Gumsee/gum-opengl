@@ -1,5 +1,5 @@
 #include <Graphics/Sprite2D.h>
-#include <GL/glew.h>
+#include <glad/gl.h>
 
 void Sprite2D::renderMesh()
 {

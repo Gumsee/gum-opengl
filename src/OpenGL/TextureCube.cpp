@@ -1,7 +1,7 @@
 #include <Graphics/TextureCube.h>
 #include <Graphics/WrapperFunctions.h>
 #include <System/Output.h>
-#include <GL/glew.h>
+#include <glad/gl.h>
 
 template<typename T>
 void tTextureCube<T>::bind(const int& index)

@@ -1,10 +1,10 @@
 #include <Graphics/Framebuffer.h>
 #include <Graphics/WrapperFunctions.h>
-#include <GL/glew.h>
 #include <System/Output.h>
 #include <Essentials/Tools.h>
 #include <Graphics/TextureHDR.h>
 #include <string>
+#include <glad/gl.h>
 
 const unsigned short Framebuffer::ClearFlags::COLOR   = GL_COLOR_BUFFER_BIT;
 const unsigned short Framebuffer::ClearFlags::DEPTH   = GL_DEPTH_BUFFER_BIT;

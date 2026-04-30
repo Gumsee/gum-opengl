@@ -1,28 +1,29 @@
 #include <Graphics/Graphics.h>
-#include <GL/glew.h>
 #include <Essentials/Tools.h>
+#define GLAD_GL_IMPLEMENTATION
+#include <glad/gl.h>
 
 namespace Gum {
 namespace Graphics
 {
     void enableFeature(const unsigned int& feature)
     {
-        glEnable(feature);
+      glEnable(feature);
     }
 
     void disableFeature(const unsigned int& feature)
     {
-        glDisable(feature);
+      glDisable(feature);
     }
 
     void renderWireframe(const bool wireframe)
     {
-        glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
+      glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
     }
 
     void cullBackside(const bool cullback)
     {
-        glCullFace(cullback ? GL_BACK : GL_FRONT);
+      glCullFace(cullback ? GL_BACK : GL_FRONT);
     }
 
 
@@ -37,41 +38,42 @@ namespace Graphics
       );
     }
 
-    void init()
+    void init(GLADloadfunc extentionloadfunc)
     {        
-        //Initialize OpenGL Variables and glew
-        Gum::Output::debug("Initializing OpenGL Variables...");
+      //Initialize OpenGL Variables and glad
+      int version = gladLoadGL(extentionloadfunc);
+      if (version == 0) {
+        Gum::Output::error("Failed to initialize OpenGL context\n");
+        return;
+      }
+      //GLenum err = glewInit();
+      //if(err != GLEW_OK && err != GLEW_ERROR_NO_GLX_DISPLAY)
+      //{
+      //  Gum::Output::error("GLEW ERROR: " + std::string(reinterpret_cast<const char*>(glewGetErrorString(err))));
+      //  return;
+      //}
 
-        #if defined GUM_OS_LINUX
-            GLenum err = glewInit();
-            if(err != GLEW_OK && err != GLEW_ERROR_NO_GLX_DISPLAY)
-            {
-                Gum::Output::error("GLEW ERROR: " + std::string(reinterpret_cast<const char*>(glewGetErrorString(err))));
-                return;
-            }
-        #endif
+      
+      //glEnable(GL_STENCIL_TEST);
+      //glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+      //glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 
-        
-        //glEnable(GL_STENCIL_TEST);
-        //glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-        //glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+      VARS::RENDERER = reinterpret_cast<const char*>(glGetString(GL_RENDERER));
+      VARS::VERSION = reinterpret_cast<const char*>(glGetString(GL_VERSION));
+      VARS::VENDOR = reinterpret_cast<const char*>(glGetString(GL_VENDOR));
+      crate<std::string> shaderver = Tools::splitStr(reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION)), '.');
+      if(shaderver.size() > 0)
+          VARS::SHADING_LANGUAGE_MAJOR_VERSION = Tools::StringToNum<int>(shaderver[0]);
+      if(shaderver.size() > 1)
+          VARS::SHADING_LANGUAGE_MINOR_VERSION = Tools::StringToNum<int>(shaderver[1]);
 
-        VARS::RENDERER = reinterpret_cast<const char*>(glGetString(GL_RENDERER));
-        VARS::VERSION = reinterpret_cast<const char*>(glGetString(GL_VERSION));
-        VARS::VENDOR = reinterpret_cast<const char*>(glGetString(GL_VENDOR));
-        crate<std::string> shaderver = Tools::splitStr(reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION)), '.');
-        if(shaderver.size() > 0)
-            VARS::SHADING_LANGUAGE_MAJOR_VERSION = Tools::StringToNum<int>(shaderver[0]);
-        if(shaderver.size() > 1)
-            VARS::SHADING_LANGUAGE_MINOR_VERSION = Tools::StringToNum<int>(shaderver[1]);
-
-        glGetIntegerv(GL_MAJOR_VERSION, &VARS::MAJOR_VERSION);
-        glGetIntegerv(GL_MINOR_VERSION, &VARS::MINOR_VERSION);
+      glGetIntegerv(GL_MAJOR_VERSION, &VARS::MAJOR_VERSION);
+      glGetIntegerv(GL_MINOR_VERSION, &VARS::MINOR_VERSION);
 
 
-        glGetIntegerv(GL_MAX_TEXTURE_SIZE, &VARS::MAX_TEXTURE_SIZE);
+      glGetIntegerv(GL_MAX_TEXTURE_SIZE, &VARS::MAX_TEXTURE_SIZE);
 
-        Gum::Output::debug("Successfully initialized OpenGL Variables!");
+      Gum::Output::debug("Successfully initialized OpenGL Variables!");
     }
 
 

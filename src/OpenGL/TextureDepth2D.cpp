@@ -1,7 +1,7 @@
 #include <Graphics/TextureDepth2D.h>
 #include <Graphics/WrapperFunctions.h>
 #include <System/Output.h>
-#include <GL/glew.h>
+#include <glad/gl.h>
 
 void TextureDepth2D::createNative()
 {

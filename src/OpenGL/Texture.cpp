@@ -1,6 +1,6 @@
 #include <Graphics/Texture.h>
 #include <Graphics/WrapperFunctions.h>
-#include <GL/glew.h>
+#include <glad/gl.h>
 
 void Texture::createNative()
 {

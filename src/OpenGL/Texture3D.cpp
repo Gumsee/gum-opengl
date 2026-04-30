@@ -1,6 +1,6 @@
 #include "Graphics/WrapperFunctions.h"
 #include <Graphics/Texture3D.h>
-#include <GL/glew.h>
+#include <glad/gl.h>
 
 template<typename T>
 void tTexture3D<T>::bind(const int& index)

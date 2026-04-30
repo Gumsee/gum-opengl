@@ -1,5 +1,5 @@
 #include <Graphics/VertexBufferObject.h>
-#include <GL/glew.h>
+#include <glad/gl.h>
 
 namespace Gum {
 namespace Graphics {

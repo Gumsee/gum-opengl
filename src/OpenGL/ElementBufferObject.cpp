@@ -1,5 +1,5 @@
 #include <Graphics/ElementBufferObject.h>
-#include <GL/glew.h>
+#include <glad/gl.h>
 
 void ElementBufferObject::createNative()    { glGenBuffers(1, &ieboID); }
 void ElementBufferObject::destroyNative()   { glDeleteBuffers(1, &ieboID); }

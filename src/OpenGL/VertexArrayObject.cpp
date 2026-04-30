@@ -1,5 +1,6 @@
 #include <Graphics/VertexArrayObject.h>
-#include <GL/glew.h>
+#include <Graphics/WrapperFunctions.h>
+#include <glad/gl.h>
 
 
 const unsigned int VertexArrayObject::PrimitiveTypes::POINTS         = GL_POINTS;
@@ -10,8 +11,10 @@ const unsigned int VertexArrayObject::PrimitiveTypes::LINES          = GL_LINES;
 const unsigned int VertexArrayObject::PrimitiveTypes::LINE_STRIP     = GL_LINE_STRIP;
 const unsigned int VertexArrayObject::PrimitiveTypes::LINE_LOOP      = GL_LINE_LOOP;
 const unsigned int VertexArrayObject::PrimitiveTypes::LINE_ADJACENCY = GL_LINES_ADJACENCY;
-const unsigned int VertexArrayObject::PrimitiveTypes::QUADS          = GL_QUADS;
-const unsigned int VertexArrayObject::PrimitiveTypes::QUAD_STRIP     = GL_QUAD_STRIP;
+
+//Deprecated
+//const unsigned int VertexArrayObject::PrimitiveTypes::QUADS          = GL_QUADS;
+//const unsigned int VertexArrayObject::PrimitiveTypes::QUAD_STRIP     = GL_QUAD_STRIP;
 
 
 void VertexArrayObject::createNative()
@@ -72,13 +75,8 @@ void VertexArrayObject::addAttributeNative(const unsigned int& index, const unsi
 
     #ifdef CHECK_GL_ERRORS
         GLenum error = 0;
-        const char *errString;
         while((error = glGetError()) != GL_NO_ERROR) 
-        {
-            errString = reinterpret_cast<const char*>(gluErrorString(error));
-            if(errString != nullptr)
-                Gum::Output::error(std::string("addAttributeNative: ") + errString);
-        }
+          Gum::Output::error(std::string("addAttributeNative: ") + graphicsErrorCodeToString(error));
     #endif
 }
 

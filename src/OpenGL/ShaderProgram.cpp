@@ -1,7 +1,7 @@
 #include "Essentials/Tools.h"
 #include <Graphics/ShaderProgram.h>
 #include <System/Output.h>
-#include <GL/glew.h>
+#include <glad/gl.h>
 
 
 void ShaderProgram::createNative()
