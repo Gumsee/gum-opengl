@@ -38,10 +38,10 @@ namespace Graphics
       );
     }
 
-    void init(GLADloadfunc extentionloadfunc)
+    void init()
     {        
       //Initialize OpenGL Variables and glad
-      int version = gladLoadGL(extentionloadfunc);
+      int version = gladLoaderLoadGL();
       if (version == 0) {
         Gum::Output::error("Failed to initialize OpenGL context\n");
         return;
