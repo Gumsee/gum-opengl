@@ -167,12 +167,12 @@ template<typename T> tTextureCube<T>* Framebuffer::addCubeTextureAttachment(uint
     return texture;
 }
 
-Texture* Framebuffer::addDepthTextureAttachment(std::string name)
+TextureDepth2D* Framebuffer::addDepthTextureAttachment(std::string name)
 {
     if(this->pDepthTexture != nullptr)
     {
         Gum::Output::error("Framebuffer: Depthtexture has already been attached");
-        return pDepthTexture;
+        return (TextureDepth2D*)pDepthTexture;
     }
     else if(this->iDepthBufferID != 0)
     {
@@ -192,15 +192,15 @@ Texture* Framebuffer::addDepthTextureAttachment(std::string name)
     checkStatus("addDepthTextureAttachment");
     #endif
     currFramebuffer->bind();
-    return this->pDepthTexture;
+    return (TextureDepth2D*)this->pDepthTexture;
 }
 
-Texture* Framebuffer::addDepthTextureArrayAttachment(const unsigned int& numlayers, std::string name)
+TextureDepth3D* Framebuffer::addDepthTextureArrayAttachment(const unsigned int& numlayers, std::string name)
 {
     if(this->pDepthTexture != nullptr)
     {
         Gum::Output::error("Framebuffer: Depthtexture has already been attached");
-        return pDepthTexture;
+        return (TextureDepth3D*)pDepthTexture;
     }
     else if(this->iDepthBufferID != 0)
     {
@@ -220,7 +220,7 @@ Texture* Framebuffer::addDepthTextureArrayAttachment(const unsigned int& numlaye
     checkStatus("addDepthTextureArrayAttachment");
     #endif
     currFramebuffer->bind();
-    return this->pDepthTexture;
+    return (TextureDepth3D*)this->pDepthTexture;
 }
 
 

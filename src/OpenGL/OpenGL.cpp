@@ -43,7 +43,7 @@ namespace Graphics
       //Initialize OpenGL Variables and glad
       int version = gladLoaderLoadGL();
       if (version == 0) {
-        Gum::Output::error("Failed to initialize OpenGL context\n");
+        Gum::Output::error("Failed to initialize OpenGL variables\n");
         return;
       }
       //GLenum err = glewInit();

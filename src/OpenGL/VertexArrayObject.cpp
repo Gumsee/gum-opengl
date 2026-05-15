@@ -1,5 +1,6 @@
 #include <Graphics/VertexArrayObject.h>
 #include <Graphics/WrapperFunctions.h>
+#include <Desktop/GraphicsContext.h>
 #include <glad/gl.h>
 
 
@@ -19,24 +20,24 @@ const unsigned int VertexArrayObject::PrimitiveTypes::LINE_ADJACENCY = GL_LINES_
 
 void VertexArrayObject::createNative()
 {
-    glGenVertexArrays(1, &ivaoID);
+    glGenVertexArrays(1, &this->iID[GraphicsContext::CurrentlyBoundContext]);
 }
 
 void VertexArrayObject::destroyNative()
 {
-    glDeleteVertexArrays(1, &ivaoID);
+    glDeleteVertexArrays(1, &this->iID[GraphicsContext::CurrentlyBoundContext]);
 }
 
 void VertexArrayObject::bind()
 {
-    glBindVertexArray(ivaoID);
+    glBindVertexArray(this->iID[GraphicsContext::CurrentlyBoundContext]);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, iIndexBuffer);
-	for (size_t i = 0; i < vAttributes.size(); i++) { glEnableVertexAttribArray(vAttributes[i]); }
+	for (size_t i = 0; i < vAttributes.size(); i++) { glEnableVertexAttribArray(vAttributes[i].index); }
 }
 
 void VertexArrayObject::unbind()
 {
-	for (size_t i = 0; i < vAttributes.size(); i++) { glDisableVertexAttribArray(vAttributes[i]); }
+	for (size_t i = 0; i < vAttributes.size(); i++) { glDisableVertexAttribArray(vAttributes[i].index); }
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 }
@@ -63,38 +64,27 @@ void VertexArrayObject::renderTesselatedIndexed(const unsigned int& instances)
 
 
 
-void VertexArrayObject::addAttributeNative(const unsigned int& index, const unsigned int& dimension, const unsigned int& type, const size_t& stride, const size_t& offset, const unsigned int& divisor)
+void VertexArrayObject::addAttributeNative(AttributeProperties& properties)
 {
-    glEnableVertexAttribArray(index);
-    if(type == GL_BYTE || type == GL_UNSIGNED_BYTE || type == GL_SHORT || type == GL_UNSIGNED_SHORT || type == GL_INT || type == GL_UNSIGNED_INT)
-        glVertexAttribIPointer(index, dimension, type, stride, (void*)offset);
-    else
-        glVertexAttribPointer(index, dimension, type, GL_FALSE, stride, (void*)offset);
-    glVertexAttribDivisor(index, divisor);
-    vAttributes.push_back(index);
+    glEnableVertexAttribArray(properties.index);
+    switch(properties.type)
+    {
+      case GL_BYTE:
+      case GL_UNSIGNED_BYTE:
+      case GL_SHORT:
+      case GL_UNSIGNED_SHORT:
+      case GL_INT:
+      case GL_UNSIGNED_INT:
+        glVertexAttribIPointer(properties.index, properties.dimension, properties.type, properties.stride, (void*)properties.offset);
+      default:
+        glVertexAttribPointer(properties.index, properties.dimension, properties.type, GL_FALSE, properties.stride, (void*)properties.offset);
+    }
+        
+    glVertexAttribDivisor(properties.index, properties.divisor);
 
     #ifdef CHECK_GL_ERRORS
         GLenum error = 0;
         while((error = glGetError()) != GL_NO_ERROR) 
           Gum::Output::error(std::string("addAttributeNative: ") + graphicsErrorCodeToString(error));
     #endif
-}
-
-
-void VertexArrayObject::addAttributeMat4Native(unsigned int index, unsigned int type, const unsigned int& divisor)
-{
-    size_t vec4Size = sizeof(vec4);
-    addAttributeNative(index + 0, 4, type, 4 * vec4Size, 0 * vec4Size, divisor);
-    addAttributeNative(index + 1, 4, type, 4 * vec4Size, 1 * vec4Size, divisor);
-    addAttributeNative(index + 2, 4, type, 4 * vec4Size, 2 * vec4Size, divisor);
-    addAttributeNative(index + 3, 4, type, 4 * vec4Size, 3 * vec4Size, divisor);
-}
-
-
-void VertexArrayObject::addAttributeMat3Native(unsigned int index, unsigned int type, const unsigned int& divisor)
-{
-    size_t vec3Size = sizeof(vec3);
-    addAttributeNative(index + 0, 3, type, 3 * vec3Size, 0 * vec3Size, divisor);
-    addAttributeNative(index + 1, 3, type, 3 * vec3Size, 1 * vec3Size, divisor);
-    addAttributeNative(index + 2, 3, type, 3 * vec3Size, 2 * vec3Size, divisor);
 }
