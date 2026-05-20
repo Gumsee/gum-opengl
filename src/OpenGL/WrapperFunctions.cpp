@@ -3,11 +3,17 @@
 #include <System/Output.h>
 #include <System/MemoryManagement.h>
 #include <glad/gl.h>
+#ifdef GUM_OS_LINUX
 #include <GL/glu.h>
+#endif
 
 std::string graphicsErrorCodeToString(const unsigned int& error)
 {
+  #ifdef GUM_OS_LINUX
   return reinterpret_cast<const char*>(gluErrorString(error));
+  #else
+  return "";
+  #endif
 }
 
 bool gumTexImage2D(const unsigned int& target, const int& level, const int& internalformat, ivec2 size, const int& border, const unsigned int& format, const unsigned int& type, const void* pixels)
