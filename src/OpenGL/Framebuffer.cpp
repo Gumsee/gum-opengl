@@ -86,7 +86,7 @@ template<typename T> tTexture2D<T>* Framebuffer::addTextureAttachment(uint8_t in
     texture->bind();
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, texture->getID(), 0);
     vDrawBuffers.push_back(GL_COLOR_ATTACHMENT0 + index);
-	glDrawBuffers(vDrawBuffers.size(), &vDrawBuffers[0]);
+	  glDrawBuffers(static_cast<GLsizei>(vDrawBuffers.size()), &vDrawBuffers[0]);
     texture->unbind();
     
     #ifdef CHECK_GL_ERRORS
@@ -126,7 +126,7 @@ template<typename T> tTextureCube<T>* Framebuffer::addCubeTextureAttachment(uint
 
     //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, GL_TEXTURE_CUBE_MAP_POSITIVE_X, texture->getID(), 0);
     vDrawBuffers.push_back(GL_COLOR_ATTACHMENT0 + index);
-	glDrawBuffers(vDrawBuffers.size(), &vDrawBuffers[0]);
+	  glDrawBuffers(static_cast<GLsizei>(vDrawBuffers.size()), &vDrawBuffers[0]);
         
     #ifdef CHECK_GL_ERRORS
     checkStatus("addCubeTextureAttachment");
@@ -157,7 +157,7 @@ template<typename T> tTextureCube<T>* Framebuffer::addCubeTextureAttachment(uint
 
     //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, GL_TEXTURE_CUBE_MAP_POSITIVE_X, texture->getID(), 0);
     vDrawBuffers.push_back(GL_COLOR_ATTACHMENT0 + index);
-	glDrawBuffers(vDrawBuffers.size(), &vDrawBuffers[0]);
+	  glDrawBuffers(static_cast<GLsizei>(vDrawBuffers.size()), &vDrawBuffers[0]);
         
     #ifdef CHECK_GL_ERRORS
     checkStatus("addCubeTextureAttachment");

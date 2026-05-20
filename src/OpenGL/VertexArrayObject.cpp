@@ -75,9 +75,9 @@ void VertexArrayObject::addAttributeNative(AttributeProperties& properties)
       case GL_UNSIGNED_SHORT:
       case GL_INT:
       case GL_UNSIGNED_INT:
-        glVertexAttribIPointer(properties.index, properties.dimension, properties.type, properties.stride, (void*)properties.offset);
+        glVertexAttribIPointer(properties.index, properties.dimension, properties.type, static_cast<GLsizei>(properties.stride), (void*)properties.offset);
       default:
-        glVertexAttribPointer(properties.index, properties.dimension, properties.type, GL_FALSE, properties.stride, (void*)properties.offset);
+        glVertexAttribPointer(properties.index, properties.dimension, properties.type, GL_FALSE, static_cast<GLsizei>(properties.stride), (void*)properties.offset);
     }
         
     glVertexAttribDivisor(properties.index, properties.divisor);

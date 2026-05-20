@@ -42,7 +42,7 @@ void tTextureCube<T>::updateImage(int side)
     if(!gumTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + side, iCurrentMipmapLevel, pixelinternalformat, v2Size[side], 0, pixelformat, Data::getDatatype(), Data::getDataPtr(side)))
         Gum::Output::error("tTextureCube::updateImage: glTexImage Failed.");
     if(side == 0 && bIsMipmapped)
-        glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+        createMipmaps();
     unbind(0);
 }
 
@@ -85,6 +85,13 @@ void tTextureCube<T>::setFiltering(FilteringType filteringtype)
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, filtering);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, filtering);
     unbind();
+}
+
+template<typename T>
+void tTextureCube<T>::createMipmaps()
+{
+  glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+  this->bIsMipmapped = true;
 }
 
 template class tTextureCube<unsigned char>;

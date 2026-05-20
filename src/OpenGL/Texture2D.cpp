@@ -45,7 +45,7 @@ void tTexture2D<T>::updateImage()
     if(!gumTexImage2D(GL_TEXTURE_2D, iCurrentMipmapLevel, pixelinternalformat, v2Size, 0, pixelformat, this->getDatatype(), this->getDataPtr(0)))
         Gum::Output::error("tTexture2D::updateImage: glTexImage Failed.");
     if(bIsMipmapped)
-        glGenerateMipmap(GL_TEXTURE_2D);
+      createMipmaps();
     unbind(0);
 }
 
@@ -96,6 +96,13 @@ void tTexture2D<T>::setFiltering(FilteringType filteringtype)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filtering);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filtering);
     unbind();
+}
+
+template<typename T>
+void tTexture2D<T>::createMipmaps()
+{
+  glGenerateMipmap(GL_TEXTURE_2D);
+  this->bIsMipmapped = true;
 }
 
 template class tTexture2D<unsigned char>;

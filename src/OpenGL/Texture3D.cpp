@@ -33,6 +33,8 @@ void tTexture3D<T>::updateImage()
     gumPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     
     glTexImage3D(GL_TEXTURE_3D, iCurrentMipmapLevel, pixelinternalformat, v3Size.x, v3Size.y, v3Size.z, 0, pixelformat, Data::getDatatype(), Data::getDataPtr(0));
+    if(bIsMipmapped)
+      createMipmaps();
     unbind(0);
 }
 
@@ -85,6 +87,13 @@ void tTexture3D<T>::setFiltering(FilteringType filteringtype)
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, filtering);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, filtering);
     unbind();
+}
+
+template<typename T>
+void tTexture3D<T>::createMipmaps()
+{
+  glGenerateMipmap(GL_TEXTURE_3D);
+  this->bIsMipmapped = true;
 }
 
 template class tTexture3D<unsigned char>;

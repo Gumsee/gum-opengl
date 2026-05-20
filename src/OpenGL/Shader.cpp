@@ -48,10 +48,8 @@ std::string Shader::compile()
     //Provide the infolog in whatever manor you deem best.
     //Exit with failure.
     glDeleteShader(iShaderID); //Don't leak the shader.
-
-    std::cout << sSource << std::endl;
     //Print error log and quit
-    return errorLog;
+    return "Error: " + errorLog;
   }
   bIsCompiled = true;
   return "";

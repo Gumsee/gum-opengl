@@ -1,5 +1,6 @@
 #include <Graphics/Graphics.h>
 #include <Essentials/Tools.h>
+#include <thread>
 #define GLAD_GL_IMPLEMENTATION
 #include <glad/gl.h>
 
@@ -30,7 +31,7 @@ namespace Graphics
     void printInfo()
     {
       std::string spacer = Gum::Output::getOutputSpacing();
-      Gum::Output::info(std::string("OpenGL info:\n") +
+      Gum::Output::debug(std::string("OpenGL info:\n") +
         spacer + " Renderer: "         + VARS::RENDERER + "\n" +
         spacer + " OpenGL version "    + VARS::VERSION + "\n" +
         spacer + " GLSL version "      + std::to_string(VARS::SHADING_LANGUAGE_MAJOR_VERSION) + "." + std::to_string(VARS::SHADING_LANGUAGE_MINOR_VERSION) + "\n" +
@@ -46,12 +47,11 @@ namespace Graphics
         Gum::Output::error("Failed to initialize OpenGL variables\n");
         return;
       }
-      //GLenum err = glewInit();
-      //if(err != GLEW_OK && err != GLEW_ERROR_NO_GLX_DISPLAY)
-      //{
-      //  Gum::Output::error("GLEW ERROR: " + std::string(reinterpret_cast<const char*>(glewGetErrorString(err))));
-      //  return;
-      //}
+
+      if(GLAD_GL_KHR_parallel_shader_compile)
+        glMaxShaderCompilerThreadsKHR(std::thread::hardware_concurrency());
+      else if(GLAD_GL_ARB_parallel_shader_compile)
+        glMaxShaderCompilerThreadsARB(std::thread::hardware_concurrency());
 
       
       //glEnable(GL_STENCIL_TEST);
