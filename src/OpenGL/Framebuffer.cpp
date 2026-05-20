@@ -38,6 +38,8 @@ void Framebuffer::bind()
 {
     //glBindTexture(GL_TEXTURE_2D, 0);//To make sure the texture isn't bound
     CurrentlyBoundFramebuffer = this;
+    if(this->iID == 0)
+      return;
     glBindFramebuffer(GL_FRAMEBUFFER, this->iID);
     resetViewport();
 }
